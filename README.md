@@ -1,2 +1,2 @@
 # three.js-renderer
-Renderer based on Three.JS
+A test project to learn basics of Three.js and React Three Fiber.

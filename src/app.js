@@ -5,6 +5,8 @@ import "../styles.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
+import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { TextGeometry } from "three/examples/jsm/geometries/TextGeometry.js";
 import GUI from "lil-gui";
 import gsap from "gsap";
 
@@ -34,6 +36,45 @@ window.addEventListener("keydown", (event) => {
   }
 });
 const debugObject = {};
+
+// Define the Renderer
+const renderer = new THREE.WebGLRenderer({
+  canvas: canvas,
+});
+renderer.setSize(canvasSize.width, canvasSize.height);
+renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+
+function resizeRenderer() {
+  canvasSize.width = window.innerWidth;
+  canvasSize.height = window.innerHeight;
+
+  renderer.setSize(canvasSize.width, canvasSize.height);
+  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
+
+  camera.aspect = canvasSize.width / canvasSize.height;
+  camera.updateProjectionMatrix();
+}
+
+function processDoubleClick() {
+  const fullscreenElement =
+    document.fullscreenElement || document.webkitFullscreenElement;
+  if (!fullscreenElement) {
+    if (canvas.requestFullscreen) {
+      canvas.requestFullscreen();
+    } else if (canvas.webkitRequestFullscreen) {
+      canvas.webkitRequestFullscreen();
+    }
+  } else {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    }
+  }
+}
+
+// Create the Scene
+const scene = new THREE.Scene();
 
 // Texture Loading
 //------------------------------------------------------
@@ -77,7 +118,7 @@ minecraftTexture.generateMipmaps = false;
 minecraftTexture.minFilter = THREE.NearestFilter;
 minecraftTexture.magFilter = THREE.NearestFilter;
 
-const matcapTexture = textureLoader.load("static/textures/matcaps/5.png");
+const matcapTexture = textureLoader.load("static/textures/matcaps/8.png");
 matcapTexture.colorSpace = THREE.SRGBColorSpace;
 
 const gradTexture = textureLoader.load("static/textures/gradients/5.jpg");
@@ -90,6 +131,34 @@ rgbeLoader.load("static/textures/environmentMap/2k.hdr", (environmentMap) => {
   environmentMap.mapping = THREE.EquirectangularReflectionMapping;
   scene.background = environmentMap;
   scene.environment = environmentMap;
+});
+
+const fontLoader = new FontLoader(loadingManager);
+fontLoader.load("static/fonts/helvetiker_regular.typeface.json", (font) => {
+  const textGeometry = new TextGeometry("Siddhartha", {
+    font: font,
+    size: 0.5,
+    depth: 0.2,
+    curveSegments: 5,
+    bevelEnabled: true,
+    bevelThickness: 0.03,
+    bevelSize: 0.02,
+    bevelOffset: 0,
+    bevelSegments: 4,
+  });
+  // textGeometry.computeBoundingBox();
+  // console.log(textGeometry.boundingBox);
+  // textGeometry.translate(
+  //   -(textGeometry.boundingBox.max.x - 0.02) / 2.0,
+  //   -(textGeometry.boundingBox.max.y - 0.02) / 2.0,
+  //   -(textGeometry.boundingBox.max.z - 0.03) / 2.0
+  // );
+  textGeometry.center();
+
+  const matText = new THREE.MeshMatcapMaterial();
+  matText.matcap = matcapTexture;
+  const mesh = new THREE.Mesh(textGeometry, matText);
+  scene.add(mesh);
 });
 
 //------------------------------------------------------
@@ -166,45 +235,6 @@ rgbeLoader.load("static/textures/environmentMap/2k.hdr", (environmentMap) => {
 //   };
 // }
 // document.addEventListener("mousedown", onMouseDown, false);
-
-// Define the Renderer
-const renderer = new THREE.WebGLRenderer({
-  canvas: canvas,
-});
-renderer.setSize(canvasSize.width, canvasSize.height);
-renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
-
-function resizeRenderer() {
-  canvasSize.width = window.innerWidth;
-  canvasSize.height = window.innerHeight;
-
-  renderer.setSize(canvasSize.width, canvasSize.height);
-  renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
-
-  camera.aspect = canvasSize.width / canvasSize.height;
-  camera.updateProjectionMatrix();
-}
-
-function processDoubleClick() {
-  const fullscreenElement =
-    document.fullscreenElement || document.webkitFullscreenElement;
-  if (!fullscreenElement) {
-    if (canvas.requestFullscreen) {
-      canvas.requestFullscreen();
-    } else if (canvas.webkitRequestFullscreen) {
-      canvas.webkitRequestFullscreen();
-    }
-  } else {
-    if (document.exitFullscreen) {
-      document.exitFullscreen();
-    } else if (document.webkitExitFullscreen) {
-      document.webkitExitFullscreen();
-    }
-  }
-}
-
-// Create the Scene
-const scene = new THREE.Scene();
 
 // Define the Camera
 const aspectRatio = canvasSize.width / canvasSize.height;

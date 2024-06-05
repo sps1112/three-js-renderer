@@ -94,47 +94,43 @@ loadingManager.onError = () => {
 
 const textureLoader = new THREE.TextureLoader(loadingManager);
 
-const colorTexture = textureLoader.load("static/textures/door/color.jpg");
+const colorTexture = textureLoader.load("textures/door/color.jpg");
 colorTexture.colorSpace = THREE.SRGBColorSpace;
 colorTexture.wrapS = THREE.MirroredRepeatWrapping;
 colorTexture.wrapT = THREE.MirroredRepeatWrapping;
 
-const alphaTexture = textureLoader.load("static/textures/door/alpha.jpg");
-const heightTexture = textureLoader.load("static/textures/door/height.jpg");
-const normalTexture = textureLoader.load("static/textures/door/normal.jpg");
+const alphaTexture = textureLoader.load("textures/door/alpha.jpg");
+const heightTexture = textureLoader.load("textures/door/height.jpg");
+const normalTexture = textureLoader.load("textures/door/normal.jpg");
 const occlusionTexture = textureLoader.load(
-  "static/textures/door/ambientOcclusion.jpg"
+  "textures/door/ambientOcclusion.jpg"
 );
-const metallicTexture = textureLoader.load(
-  "static/textures/door/metalness.jpg"
-);
-const roughnessTexture = textureLoader.load(
-  "static/textures/door/roughness.jpg"
-);
+const metallicTexture = textureLoader.load("textures/door/metalness.jpg");
+const roughnessTexture = textureLoader.load("textures/door/roughness.jpg");
 
-const minecraftTexture = textureLoader.load("static/textures/minecraft.png");
+const minecraftTexture = textureLoader.load("textures/minecraft.png");
 minecraftTexture.colorSpace = THREE.SRGBColorSpace;
 minecraftTexture.generateMipmaps = false;
 minecraftTexture.minFilter = THREE.NearestFilter;
 minecraftTexture.magFilter = THREE.NearestFilter;
 
-const matcapTexture = textureLoader.load("static/textures/matcaps/8.png");
+const matcapTexture = textureLoader.load("textures/matcaps/8.png");
 matcapTexture.colorSpace = THREE.SRGBColorSpace;
 
-const gradTexture = textureLoader.load("static/textures/gradients/5.jpg");
+const gradTexture = textureLoader.load("textures/gradients/5.jpg");
 gradTexture.generateMipmaps = false;
 gradTexture.minFilter = THREE.NearestFilter;
 gradTexture.magFilter = THREE.NearestFilter;
 
 const rgbeLoader = new RGBELoader(loadingManager);
-rgbeLoader.load("static/textures/environmentMap/2k.hdr", (environmentMap) => {
+rgbeLoader.load("textures/environmentMap/2k.hdr", (environmentMap) => {
   environmentMap.mapping = THREE.EquirectangularReflectionMapping;
   scene.background = environmentMap;
   scene.environment = environmentMap;
 });
 
 const fontLoader = new FontLoader(loadingManager);
-fontLoader.load("static/fonts/helvetiker_regular.typeface.json", (font) => {
+fontLoader.load("fonts/helvetiker_regular.typeface.json", (font) => {
   const textGeometry = new TextGeometry("Siddhartha", {
     font: font,
     size: 0.5,

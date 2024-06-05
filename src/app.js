@@ -34,6 +34,42 @@ window.addEventListener("keydown", (event) => {
 });
 const debugObject = {};
 
+// Texture Loading
+//------------------------------------------------------
+const loadingManager = new THREE.LoadingManager();
+loadingManager.onStart = () => {
+  console.log("Start to load asset");
+};
+loadingManager.onProgress = () => {
+  console.log("Loading asset");
+};
+loadingManager.onLoad = () => {
+  console.log("Loaded Assets Succesfully");
+};
+loadingManager.onError = () => {
+  console.log("Error!!! Asset could not be loaded");
+};
+
+const textureLoader = new THREE.TextureLoader(loadingManager);
+const colorTexture = textureLoader.load("static/textures/door/color.jpg");
+colorTexture.colorSpace = THREE.SRGBColorSpace;
+colorTexture.wrapS = THREE.MirroredRepeatWrapping;
+colorTexture.wrapT = THREE.MirroredRepeatWrapping;
+colorTexture.magFilter = THREE.NearestFilter;
+const alphaTexture = textureLoader.load("static/textures/door/alpha.jpg");
+const heightTexture = textureLoader.load("static/textures/door/height.jpg");
+const normalTexture = textureLoader.load("static/textures/door/normal.jpg");
+const occlusionTexture = textureLoader.load(
+  "static/textures/door/ambientOcclusion.jpg"
+);
+const metallicTexture = textureLoader.load(
+  "static/textures/door/metalness.jpg"
+);
+const roughnessTexture = textureLoader.load(
+  "static/textures/door/roughness.jpg"
+);
+//------------------------------------------------------
+
 // // Define Camera Settings
 // var pitch = 0; // Angle with X axis
 // var yaw = Math.PI / 2; // Angle with Y axis
@@ -182,7 +218,7 @@ const sphereGeometry = new THREE.SphereGeometry(
   debugObject.sphereSubdivisions
 );
 const torusGeometry = new THREE.TorusGeometry(0.8, 0.2, 18, 18);
-
+const planeGeometry = new THREE.PlaneGeometry(1, 1, 10, 10);
 //-------------------------------------
 const positionsArray = new Float32Array([0, 0, 0, 0, 1, 0, 1, 0, 0]);
 const positionAttribute = new THREE.BufferAttribute(positionsArray, 3);
@@ -200,11 +236,15 @@ ranGeometry.setAttribute("position", posAttribute);
 //-------------------------------------
 
 // Define the materials
-debugObject.color1 = 0xdd000f;
+debugObject.color1 = 0xffffff;
 debugObject.color2 = 0x00ff44;
 debugObject.color3 = 0x0066ff;
-debugObject.color4 = 0x440088;
-const mat1 = new THREE.MeshBasicMaterial({ color: debugObject.color1 }); // Red
+debugObject.color4 = 0xdd000f;
+debugObject.color5 = 0xffffff;
+const mat1 = new THREE.MeshBasicMaterial({
+  color: debugObject.color1,
+  map: colorTexture,
+}); // Red
 const mat2 = new THREE.MeshStandardMaterial({
   color: debugObject.color2,
   roughness: 0.3,
@@ -217,6 +257,9 @@ const mat4 = new THREE.MeshBasicMaterial({
   color: debugObject.color4,
   wireframe: true,
 }); // Blue Wireframe
+const mat5 = new THREE.MeshBasicMaterial({
+  color: debugObject.color5,
+});
 
 // Create the scene objects
 const group = new THREE.Group();
@@ -243,6 +286,11 @@ const ran = new THREE.Mesh(ranGeometry, mat4);
 ran.position.y = -1;
 group.add(ran);
 
+const plane = new THREE.Mesh(planeGeometry, mat5);
+plane.position.z = -3;
+plane.scale.set(10, 10, 1);
+group.add(plane);
+
 // Add other utilities
 const axesHelper = new THREE.AxesHelper(5);
 scene.add(axesHelper);
@@ -258,8 +306,8 @@ const rpm = {
   group: 0,
   sphere: 30,
   torus: 45,
-  cubeX: 0.4,
-  cubeY: 0.3,
+  cubeX: 25,
+  cubeY: 20,
 };
 
 // Define controls
@@ -345,6 +393,13 @@ objectGUI
   .onChange((value) => {
     mat4.color.set(value);
   });
+objectGUI
+  .addColor(debugObject, "color5")
+  .name("Mat5 Color")
+  .onChange((value) => {
+    mat5.color.set(value);
+  });
+objectGUI.add(mat5, "wireframe").name("Mat5 Wireframe");
 
 const otherGUI = gui.addFolder("Misc");
 otherGUI.add(rpm, "group").name("Group RPM").min(-120).max(120).step(0.1);
@@ -379,8 +434,8 @@ var update = function () {
   // camera.lookAt(group.position);
 
   // Do object calculations
-  cube.rotateX(2 * Math.PI * rpm.cubeX * deltaTime);
-  cube.rotateY(2 * Math.PI * rpm.cubeY * deltaTime);
+  cube.rotateX(((2 * Math.PI * rpm.cubeX) / 60.0) * deltaTime);
+  cube.rotateY(((2 * Math.PI * rpm.cubeY) / 60.0) * deltaTime);
   sphere.rotateY(((2 * Math.PI * rpm.sphere) / 60.0) * deltaTime);
   torus.position.y = 2.0 * Math.sin(1.0 * currTime);
   torus.rotateX(((2 * Math.PI * rpm.torus) / 60.0) * deltaTime);

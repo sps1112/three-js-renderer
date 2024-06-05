@@ -4,6 +4,7 @@
 import "../styles.css";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import GUI from "lil-gui";
 import gsap from "gsap";
 
 // Define the Canvas
@@ -17,6 +18,21 @@ canvas.width = canvasSize.width;
 canvas.height = canvasSize.height;
 
 window.addEventListener("dblclick", processDoubleClick);
+
+// Create GUI
+const gui = new GUI({
+  title: "Scene Properties",
+  width: canvasSize.width / 4.0,
+  closeFolders: true,
+});
+// gui.close();
+// gui.hide();
+window.addEventListener("keydown", (event) => {
+  if (event.key == "h") {
+    gui.show(gui._hidden);
+  }
+});
+const debugObject = {};
 
 // // Define Camera Settings
 // var pitch = 0; // Angle with X axis
@@ -152,13 +168,19 @@ scene.add(camOrtho);
 // Define Lights
 const ambientLight = new THREE.AmbientLight(0x3a3a3a);
 scene.add(ambientLight);
-const pointLight = new THREE.PointLight(0xffffff, 2, 100);
+debugObject.lightCol = 0xffffff;
+const pointLight = new THREE.PointLight(debugObject.lightCol, 2, 100);
 pointLight.position.set(1, 1, 1);
 scene.add(pointLight);
 
 // Define basic geometry
+debugObject.sphereSubdivisions = 18;
 const cubeGeometry = new THREE.BoxGeometry(1, 1, 1);
-const sphereGeometry = new THREE.SphereGeometry(1, 18, 18);
+const sphereGeometry = new THREE.SphereGeometry(
+  1,
+  debugObject.sphereSubdivisions,
+  debugObject.sphereSubdivisions
+);
 const torusGeometry = new THREE.TorusGeometry(0.8, 0.2, 18, 18);
 
 //-------------------------------------
@@ -178,13 +200,23 @@ ranGeometry.setAttribute("position", posAttribute);
 //-------------------------------------
 
 // Define the materials
-const mat1 = new THREE.MeshBasicMaterial({ color: 0xdd000f }); // Red
+debugObject.color1 = 0xdd000f;
+debugObject.color2 = 0x00ff44;
+debugObject.color3 = 0x0066ff;
+debugObject.color4 = 0x440088;
+const mat1 = new THREE.MeshBasicMaterial({ color: debugObject.color1 }); // Red
 const mat2 = new THREE.MeshStandardMaterial({
-  color: 0x00ff44,
+  color: debugObject.color2,
   roughness: 0.3,
 }); // Green Lit
-const mat3 = new THREE.MeshBasicMaterial({ color: 0x0066ff, wireframe: true }); // Blue Wireframe
-const mat4 = new THREE.MeshBasicMaterial({ color: 0x440088, wireframe: true }); // Blue Wireframe
+const mat3 = new THREE.MeshBasicMaterial({
+  color: debugObject.color3,
+  wireframe: true,
+}); // Blue Wireframe
+const mat4 = new THREE.MeshBasicMaterial({
+  color: debugObject.color4,
+  wireframe: true,
+}); // Blue Wireframe
 
 // Create the scene objects
 const group = new THREE.Group();
@@ -222,7 +254,13 @@ scene.add(lightHelper);
 // Define some parameters
 const clock = new THREE.Clock();
 var prevTime = clock.getElapsedTime();
-const rpm = 4;
+const rpm = {
+  group: 0,
+  sphere: 30,
+  torus: 45,
+  cubeX: 0.4,
+  cubeY: 0.3,
+};
 
 // Define controls
 const controls = new OrbitControls(camera, canvas);
@@ -235,6 +273,94 @@ controls.update();
 // Define Animations
 // gsap.to(cube.position, { duration: 1, delay: 0.5, y: 2 });
 // gsap.to(cube.position, { duration: 1, delay: 2.0, y: 0 });
+
+// Setup GUI for scene
+//-----------------------------------------------
+const lightGUI = gui.addFolder("Point Light");
+lightGUI
+  .add(pointLight.position, "x")
+  .name("Light X")
+  .min(-5)
+  .max(5)
+  .step(0.01);
+lightGUI
+  .add(pointLight.position, "y")
+  .name("Light Y")
+  .min(-5)
+  .max(5)
+  .step(0.01);
+lightGUI
+  .add(pointLight.position, "z")
+  .name("Light Z")
+  .min(-5)
+  .max(5)
+  .step(0.01);
+lightGUI
+  .add(pointLight, "intensity")
+  .name("Light Intensity")
+  .min(0)
+  .max(10)
+  .step(0.01);
+lightGUI
+  .addColor(debugObject, "lightCol")
+  .name("Light Color")
+  .onChange((value) => {
+    pointLight.color.set(value);
+  });
+
+const objectGUI = gui.addFolder("Objects");
+objectGUI.add(cube, "visible").name("Cube Visibility");
+objectGUI
+  .addColor(debugObject, "color1")
+  .name("Mat1 Color")
+  .onChange((value) => {
+    mat1.color.set(value);
+  });
+objectGUI
+  .add(debugObject, "sphereSubdivisions")
+  .name("Sphere Subdivisions")
+  .min(2)
+  .max(72)
+  .step(1)
+  .onChange((value) => {
+    sphere.geometry.dispose();
+    sphere.geometry = new THREE.SphereGeometry(1, value, value);
+  });
+objectGUI
+  .addColor(debugObject, "color2")
+  .name("Mat2 Color")
+  .onChange((value) => {
+    mat2.color.set(value);
+  });
+objectGUI.add(mat2, "wireframe").name("Mat2 Wireframe");
+objectGUI
+  .addColor(debugObject, "color3")
+  .name("Mat3 Color")
+  .onChange((value) => {
+    mat3.color.set(value);
+  });
+objectGUI
+  .addColor(debugObject, "color4")
+  .name("Mat4 Color")
+  .onChange((value) => {
+    mat4.color.set(value);
+  });
+
+const otherGUI = gui.addFolder("Misc");
+otherGUI.add(rpm, "group").name("Group RPM").min(-120).max(120).step(0.1);
+otherGUI.add(rpm, "torus").name("Torus RPM").min(-120).max(120).step(0.1);
+otherGUI.add(rpm, "sphere").name("Sphere RPM").min(-120).max(120).step(0.1);
+otherGUI.add(sphere.position, "x").name("Sphere X").min(-5).max(5).step(0.01);
+
+debugObject.spin = () => {
+  gsap.to(group.rotation, {
+    duration: 1.0,
+    delay: 0.0,
+    z: group.rotation.z + Math.PI,
+  });
+};
+otherGUI.add(debugObject, "spin").name("Spin Group");
+//-----------------------------------------------
 
 // Render Loop
 var update = function () {
@@ -253,12 +379,12 @@ var update = function () {
   // camera.lookAt(group.position);
 
   // Do object calculations
-  cube.rotateX(2 * Math.PI * 0.4 * deltaTime);
-  cube.rotateY(2 * Math.PI * 0.3 * deltaTime);
-  sphere.rotateY(2 * Math.PI * 0.5 * deltaTime);
+  cube.rotateX(2 * Math.PI * rpm.cubeX * deltaTime);
+  cube.rotateY(2 * Math.PI * rpm.cubeY * deltaTime);
+  sphere.rotateY(((2 * Math.PI * rpm.sphere) / 60.0) * deltaTime);
   torus.position.y = 2.0 * Math.sin(1.0 * currTime);
-  torus.rotateX(2 * Math.PI * 0.75 * deltaTime);
-  group.rotateZ(((2 * Math.PI * rpm) / 60.0) * deltaTime);
+  torus.rotateX(((2 * Math.PI * rpm.torus) / 60.0) * deltaTime);
+  group.rotateZ(((2 * Math.PI * rpm.group) / 60.0) * deltaTime);
 
   // Update controls
   controls.update();

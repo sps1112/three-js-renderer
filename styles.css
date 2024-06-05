@@ -1,0 +1,17 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  overflow: hidden;
+}
+
+.sceneCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  outline: none;
+}

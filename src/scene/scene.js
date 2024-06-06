@@ -3,7 +3,6 @@
 //! Scene Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
-import { setupHelpers } from "../utils/helpers";
 import * as MESH from "./mesh";
 import { rgbeLoader } from "../utils/loader";
 import { loadFont } from "../rendering/font";
@@ -12,12 +11,14 @@ import { loadFont } from "../rendering/font";
 //! Scene Variables
 //-----------------------------------------------
 var scene;
+var lights;
 //-----------------------------------------------
 
 //! Scene Functions
 //-----------------------------------------------
 function setupScene() {
   scene = new THREE.Scene();
+  lights = [];
 }
 
 function setEnvironment() {
@@ -26,6 +27,18 @@ function setEnvironment() {
     scene.background = environmentMap;
     scene.environment = environmentMap;
   });
+}
+
+function addLight(light) {
+  lights.push(light);
+  scene.add(light.light);
+}
+
+function logLights() {
+  for (var i = 0; i < lights.length; i++) {
+    var light = lights[i];
+    console.log(i + " " + light.color + " " + light.light.intensity);
+  }
 }
 
 function populateScene() {
@@ -37,19 +50,17 @@ function populateScene() {
   loadFont("fonts/helvetiker_regular.typeface.json", "Siddhartha");
 }
 
-function addUtils() {
-  setupHelpers(scene);
-}
-
 function refreshScene() {}
 //-----------------------------------------------
 
 export {
   scene,
   setupScene,
-  addUtils,
   refreshScene,
   populateScene,
   setEnvironment,
+  lights,
+  addLight,
+  logLights,
 };
 //---------------------------------------------------------------

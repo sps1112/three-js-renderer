@@ -5,16 +5,98 @@
 import { gui, debugObject } from "./gui";
 import * as MATERIAL from "../rendering/material";
 import * as MESH from "../scene/mesh";
+import { lights } from "../scene/scene";
+import { LIGHT_TYPES } from "../scene/light";
+import { lightHelpers } from "../utils/helpers";
 //-----------------------------------------------
 
 //! Widget Variables
 //-----------------------------------------------
+var lightGUI;
+var ambientGUI = null;
+var pointGUI = null;
+
 var objectGUI;
 //-----------------------------------------------
 
 //! Widget Functions
 //-----------------------------------------------
-function setupLightGUI() {}
+function setAmbientGUI(index, light) {
+  if (ambientGUI == null) {
+    ambientGUI = lightGUI.addFolder("Ambient");
+  }
+  ambientGUI
+    .addColor(light, "color")
+    .name("Ambient " + index + " Color")
+    .onChange((value) => {
+      light.refresh(value);
+    });
+
+  ambientGUI
+    .add(light.light, "intensity")
+    .name("Ambient " + index + " Intensity")
+    .min(0)
+    .max(5)
+    .step(0.1);
+}
+
+function setPointGUI(index, light) {
+  if (pointGUI == null) {
+    pointGUI = lightGUI.addFolder("Point");
+  }
+  pointGUI
+    .add(light.light.position, "x")
+    .name("Light " + index + " X")
+    .min(-10)
+    .max(10)
+    .step(0.1);
+  pointGUI
+    .add(light.light.position, "y")
+    .name("Light " + index + " Y")
+    .min(-10)
+    .max(10)
+    .step(0.1);
+  pointGUI
+    .add(light.light.position, "z")
+    .name("Light " + index + " Z")
+    .min(-10)
+    .max(10)
+    .step(0.1);
+  pointGUI
+    .addColor(light, "color")
+    .name("Diffuse " + index + " Color")
+    .onChange((value) => {
+      light.refresh(value);
+      if (lightHelpers.length > 0) {
+        lightHelpers[index - 1].color = value;
+        lightHelpers[index - 1].update();
+      }
+    });
+  pointGUI
+    .add(light.light, "intensity")
+    .name("Diffuse " + index + " Intensity")
+    .min(0)
+    .max(100)
+    .step(0.5);
+}
+
+function setupLightGUI() {
+  lightGUI = gui.addFolder("Lights");
+
+  var aCount = 0;
+  var pCount = 0;
+  for (var i = 0; i < lights.length; i++) {
+    var light = lights[i];
+
+    if (light.type == LIGHT_TYPES.AMBIENT) {
+      aCount++;
+      setAmbientGUI(aCount, light);
+    } else if (light.type == LIGHT_TYPES.POINT) {
+      pCount++;
+      setPointGUI(pCount, light);
+    }
+  }
+}
 
 function setupObjectsGUI() {
   objectGUI = gui.addFolder("Objects");
@@ -159,5 +241,5 @@ function setupObjectsGUI() {
 function setupMiscGUI() {}
 //-----------------------------------------------
 
-export { setupObjectsGUI };
+export { setupObjectsGUI, setupLightGUI };
 //---------------------------------------------------------------

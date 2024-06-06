@@ -12,7 +12,11 @@ import * as TEXTURE from "./rendering/texture";
 import * as MATERIAL from "./rendering/material";
 import * as MESH from "./scene/mesh";
 import * as SCENE from "./scene/scene";
-import { setupObjectsGUI } from "./gui/widget";
+import * as CAMERA from "./scene/camera";
+import * as LIGHT from "./scene/light";
+import { setupLightGUI, setupObjectsGUI } from "./gui/widget";
+import { Timer } from "./rendering/renderer";
+import { setupHelpers, setupLightHelpers } from "./utils/helpers";
 
 // Define the Canvas
 const canvasSize = {
@@ -42,8 +46,7 @@ function resizeRenderer() {
   renderer.setSize(canvasSize.width, canvasSize.height);
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
 
-  camera.aspect = canvasSize.width / canvasSize.height;
-  camera.updateProjectionMatrix();
+  camera.update(canvasSize.width / canvasSize.height);
 }
 
 function processDoubleClick() {
@@ -150,49 +153,27 @@ TEXTURE.setupTextures();
 
 // Define the Camera
 const aspectRatio = canvasSize.width / canvasSize.height;
-const camera = new THREE.PerspectiveCamera(60, aspectRatio, 0.1, 1000);
-var camDistance = 5;
-camera.position.set(0, 0, camDistance);
-SCENE.scene.add(camera);
-
 const orthoSize = 6.0;
-const camOrtho = new THREE.OrthographicCamera(
-  -aspectRatio * 0.5 * orthoSize,
-  aspectRatio * 0.5 * orthoSize,
-  0.5 * orthoSize,
-  -0.5 * orthoSize,
-  0.1,
-  1000
-);
-camOrtho.position.set(0, 0, 5);
-SCENE.scene.add(camOrtho);
-
-// Define Lights
-debugObject.ambientColor = 0xffffff;
-debugObject.diffuseCol = 0xffffff;
-const ambientLight = new THREE.AmbientLight(debugObject.ambientColor, 1);
-const pointLight = new THREE.PointLight(debugObject.diffuseCol, 30, 200);
-pointLight.position.set(2, 3, 4);
-SCENE.scene.add(ambientLight, pointLight);
+const camera = new CAMERA.PerspectiveCam(60, aspectRatio, 0.1, 1000, 5);
+// const camera = new CAMERA.OrthographicCam(orthoSize, aspectRatio, 0.1, 1000, 5);
+SCENE.scene.add(camera.cam);
 
 GEOMETRY.setupGeometry();
 MATERIAL.setupMaterials();
 SCENE.setEnvironment();
 SCENE.populateScene();
 
-// Add other utilities
-const lightHelper = new THREE.PointLightHelper(
-  pointLight,
-  0.1,
-  debugObject.diffuseCol
-);
-SCENE.scene.add(lightHelper);
+// Define Lights
+SCENE.addLight(new LIGHT.AmbientLight(0xffffff, 0.5));
+SCENE.addLight(new LIGHT.PointLight(0xffffff, 30, 200, [2, 3, 4]));
+SCENE.addLight(new LIGHT.PointLight(0x550099, 15, 200, [-2, 2, 2]));
 
-SCENE.addUtils();
+// Add other utilities
+setupHelpers();
+setupLightHelpers();
 
 // Define some parameters
-const clock = new THREE.Clock();
-var prevTime = clock.getElapsedTime();
+const timer = new Timer();
 const rpm = {
   group: 0,
   sphere: 30,
@@ -202,7 +183,7 @@ const rpm = {
 };
 
 // Define controls
-setupOrbitalControls(camera, canvas, MESH.group);
+setupOrbitalControls(camera.cam, canvas, MESH.group);
 
 // Define Animations
 // gsap.to(cube.position, { duration: 1, delay: 0.5, y: 2 });
@@ -210,52 +191,7 @@ setupOrbitalControls(camera, canvas, MESH.group);
 
 // Setup GUI for scene
 //-----------------------------------------------
-const lightGUI = gui.addFolder("Lights");
-lightGUI
-  .addColor(debugObject, "ambientColor")
-  .name("Ambient Color")
-  .onChange((value) => {
-    ambientLight.color.set(value);
-  });
-lightGUI
-  .add(ambientLight, "intensity")
-  .name("Ambient Intensity")
-  .min(0)
-  .max(5)
-  .step(0.1);
-lightGUI
-  .add(pointLight.position, "x")
-  .name("Light X")
-  .min(-10)
-  .max(10)
-  .step(0.1);
-lightGUI
-  .add(pointLight.position, "y")
-  .name("Light Y")
-  .min(-10)
-  .max(10)
-  .step(0.1);
-lightGUI
-  .add(pointLight.position, "z")
-  .name("Light Z")
-  .min(-10)
-  .max(10)
-  .step(0.1);
-lightGUI
-  .addColor(debugObject, "diffuseCol")
-  .name("Diffuse Color")
-  .onChange((value) => {
-    pointLight.color.set(value);
-    lightHelper.color = value;
-    lightHelper.update();
-  });
-lightGUI
-  .add(pointLight, "intensity")
-  .name("Diffuse Intensity")
-  .min(0)
-  .max(100)
-  .step(0.5);
-
+setupLightGUI();
 setupObjectsGUI();
 
 const otherGUI = gui.addFolder("Misc");
@@ -282,9 +218,7 @@ otherGUI.add(debugObject, "spin").name("Spin Group");
 // Render Loop
 var update = function () {
   // Time Calculations
-  const currTime = clock.getElapsedTime();
-  const deltaTime = currTime - prevTime;
-  prevTime = currTime;
+  timer.update();
   //   console.log("Framerate: " + 1.0 / deltaTime);
 
   // Do camera calculations
@@ -296,18 +230,18 @@ var update = function () {
   // camera.lookAt(group.position);
 
   // Do object calculations
-  MESH.cube.rotateX(((2 * Math.PI * rpm.cubeX) / 60.0) * deltaTime);
-  MESH.cube.rotateY(((2 * Math.PI * rpm.cubeY) / 60.0) * deltaTime);
-  MESH.sphere.rotateY(((2 * Math.PI * rpm.sphere) / 60.0) * deltaTime);
-  MESH.torus.position.y = 2.0 * Math.sin(1.0 * currTime);
-  MESH.torus.rotateX(((2 * Math.PI * rpm.torus) / 60.0) * deltaTime);
-  MESH.group.rotateZ(((2 * Math.PI * rpm.group) / 60.0) * deltaTime);
+  MESH.cube.rotateX(((2 * Math.PI * rpm.cubeX) / 60.0) * timer.deltaTime);
+  MESH.cube.rotateY(((2 * Math.PI * rpm.cubeY) / 60.0) * timer.deltaTime);
+  MESH.sphere.rotateY(((2 * Math.PI * rpm.sphere) / 60.0) * timer.deltaTime);
+  MESH.torus.position.y = 2.0 * Math.sin(1.0 * timer.currTime);
+  MESH.torus.rotateX(((2 * Math.PI * rpm.torus) / 60.0) * timer.deltaTime);
+  MESH.group.rotateZ(((2 * Math.PI * rpm.group) / 60.0) * timer.deltaTime);
 
   // Update controls
   updateControls();
 
   // Render the scene
-  renderer.render(SCENE.scene, camera);
+  renderer.render(SCENE.scene, camera.cam);
   //   renderer.render(scene, camOrtho);
 
   // // Update Camera

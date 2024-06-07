@@ -6,7 +6,6 @@ import * as THREE from "three";
 import { scene, group } from "../scene/scene";
 import { PerspectiveCam, OrthographicCam } from "../scene/camera";
 import { setupOrbitalControls, updateControls } from "../utils/controls";
-import { call } from "three/examples/jsm/nodes/Nodes.js";
 //-----------------------------------------------
 
 //! Renderer Variables

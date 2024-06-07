@@ -9,7 +9,6 @@ import * as TEXTURE from "./rendering/texture";
 import * as MATERIAL from "./rendering/material";
 import * as MESH from "./scene/mesh";
 import * as SCENE from "./scene/scene";
-import * as CAMERA from "./scene/camera";
 import * as LIGHT from "./scene/light";
 import * as RENDERER from "./rendering/renderer";
 import { setupLightGUI, setupObjectsGUI } from "./gui/widget";

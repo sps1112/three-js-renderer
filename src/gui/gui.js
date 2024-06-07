@@ -3,6 +3,7 @@
 //! Gui Dependencies
 //-----------------------------------------------
 import GUI from "lil-gui";
+import { canvasSize } from "../rendering/renderer";
 //-----------------------------------------------
 
 //! Gui Variables
@@ -12,10 +13,10 @@ var gui;
 
 //! Gui Functions
 //-----------------------------------------------
-function setupGUI(size) {
+function setupGUI() {
   gui = new GUI({
     title: "Scene Properties",
-    width: size,
+    width: canvasSize.width / 4.0,
     closeFolders: true,
   });
   // gui.close();

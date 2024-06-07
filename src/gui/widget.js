@@ -98,6 +98,7 @@ function setMeshGUI(parent, mesh) {
   scale.add(mesh.mesh.scale, "y").name("Y").min(-10).max(10).step(0.1);
   scale.add(mesh.mesh.scale, "z").name("Z").min(-10).max(10).step(0.1);
 
+  parent.add(mesh, "resetTransform").name("Reset Transform");
   parent.add(mesh.mesh, "visible").name("Visibility");
 }
 

@@ -2,7 +2,6 @@
 //-----------------------------------------------
 // Import libraries
 import "../styles.css";
-import { setupOrbitalControls, updateControls } from "./utils/controls";
 import { setupGUI } from "./gui/gui";
 import { setupLoaders } from "./utils/loader";
 import * as GEOMETRY from "./rendering/geometry";
@@ -17,29 +16,17 @@ import { setupLightGUI, setupObjectsGUI } from "./gui/widget";
 import { setupHelpers, setupLightHelpers } from "./utils/helpers";
 import { fonts, loadFont } from "./rendering/font";
 
-// Define the Canvas and Renderer
-RENDERER.setupCanvas();
+// Setup Renderer components
 RENDERER.setupRenderer();
-
-// Create GUI
-setupGUI(RENDERER.canvasSize.width / 4.0);
-
-// Create the Scene
+setupGUI();
 SCENE.setupScene();
-
-// Texture and Font Loading
+RENDERER.setCamera();
 setupLoaders();
+
+// Load assets
 TEXTURE.setupTextures();
 loadFont("fonts/helvetiker_regular.typeface.json");
 loadFont("fonts/helvetiker_bold.typeface.json");
-
-// Define the Camera
-const aspectRatio = RENDERER.canvasSize.width / RENDERER.canvasSize.height;
-const orthoSize = 6.0;
-const camera = new CAMERA.PerspectiveCam(60, aspectRatio, 0.1, 1000, 6);
-// const camera = new CAMERA.OrthographicCam(orthoSize, aspectRatio, 0.1, 1000, 5);
-RENDERER.setCamera(camera);
-SCENE.scene.add(camera.cam);
 
 // Setup the scene
 //-------------------------------------------
@@ -89,7 +76,7 @@ SCENE.addMesh(
 
 SCENE.addMesh(
   new MESH.Mesh(
-    new GEOMETRY.GeometryText(6, "Siddhartha", fonts[0]),
+    new GEOMETRY.GeometryText(6, "Siddhartha Pratap Singh", fonts[0]),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.TEXT, 0x0066ff),
     [0, 2, 0],
     [0, 0, 0],
@@ -103,36 +90,14 @@ SCENE.addLight(new LIGHT.PointLight(0xffffff, 30, 200, [2, 3, 4]));
 SCENE.addLight(new LIGHT.PointLight(0x550099, 15, 200, [-2, 2, 2]));
 
 // Add other utilities
-setupHelpers();
-setupLightHelpers();
+// setupHelpers();
+// setupLightHelpers();
 //-------------------------------------------
-
-// Define some parameters
-const timer = new RENDERER.Timer();
-setupOrbitalControls(camera.cam, RENDERER.canvas, SCENE.group);
 
 // Setup GUI for scene
 setupLightGUI();
 setupObjectsGUI();
 
-// Render Loop
-var update = function () {
-  // Time Calculations
-  timer.update();
-  //   console.log("Framerate: " + 1.0 / deltaTime);
-
-  // Do object calculations
-  //...
-
-  // Update controls
-  updateControls();
-
-  // Render the scene
-  RENDERER.renderer.render(SCENE.scene, camera.cam);
-  //   renderer.render(scene, camOrtho);
-
-  // Setup callback
-  window.requestAnimationFrame(update);
-};
-update();
+// Start Loop
+RENDERER.startRenderLoop([]);
 //-----------------------------------------------

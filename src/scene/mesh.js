@@ -25,17 +25,15 @@ class Mesh {
   }
 
   resetTransform() {
-    this.mesh.position.set(
-      this.position[0],
-      this.position[1],
-      this.position[2]
-    );
-    this.mesh.rotation.set(
-      this.rotation[0],
-      this.rotation[1],
-      this.rotation[2]
-    );
-    this.mesh.scale.set(this.scale[0], this.scale[1], this.scale[2]);
+    // update transform with default data
+    this.updateTransform(this.position, this.rotation, this.scale);
+  }
+
+  updateTransform(position, rotation, scale) {
+    // Set the transform based on given data
+    this.mesh.position.set(position[0], position[1], position[2]);
+    this.mesh.rotation.set(rotation[0], rotation[1], rotation[2]);
+    this.mesh.scale.set(scale[0], scale[1], scale[2]);
   }
 }
 //-----------------------------------------------

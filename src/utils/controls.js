@@ -17,8 +17,8 @@ function setupOrbitalControls(camera, canvas, lookAt) {
   // controls.enabled = false;
   controls.enableDamping = true;
   // controls.enablePan = false;
-  controls.target.y = lookAt.position.y;
-  controls.update();
+  controls.target = lookAt.position;
+  updateControls();
 }
 
 function updateControls() {

@@ -1,3 +1,5 @@
+import wasm from "vite-plugin-wasm";
+
 export default {
   root: "./", // Sources files (typically where index.html is)
   publicDir: "static/", // Path from "root" to static assets (files that are served as they are)
@@ -10,4 +12,5 @@ export default {
     emptyOutDir: true, // Empty the folder first
     sourcemap: true, // Add sourcemap
   },
+  plugins: [wasm()],
 };

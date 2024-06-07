@@ -20,7 +20,7 @@ function setupScene() {
   scene = new THREE.Scene();
 
   group = new THREE.Group();
-  group.position.y = 1.0;
+  group.position.y = 0.0;
   scene.add(group);
 
   lights = [];
@@ -30,8 +30,8 @@ function setupScene() {
 function setEnvironment() {
   rgbeLoader.load("textures/environmentMap/2k.hdr", (environmentMap) => {
     environmentMap.mapping = THREE.EquirectangularReflectionMapping;
-    scene.background = environmentMap;
-    scene.environment = environmentMap;
+    // scene.background = environmentMap;
+    // scene.environment = environmentMap;
   });
 }
 

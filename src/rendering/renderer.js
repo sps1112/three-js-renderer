@@ -59,6 +59,8 @@ function setCamera() {
   const orthoSize = 6.0;
   camera = new PerspectiveCam(60, aspectRatio, 0.1, 1000, 6);
   // camera = new OrthographicCam(orthoSize, aspectRatio, 0.1, 1000, 5);
+  camera.cam.position.x = 5.0;
+  camera.cam.position.y = 5.0;
   scene.add(camera.cam);
 }
 
@@ -103,7 +105,7 @@ function renderLoop() {
   //   console.log("Framerate: " + 1.0 / deltaTime);
 
   // Execute callbacks (like object calculations)
-  callbacks.forEach((callback) => callback());
+  callbacks.forEach((callback) => callback(timer.deltaTime));
 
   // Update controls
   updateControls();

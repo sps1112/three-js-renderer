@@ -2,12 +2,11 @@
 //---------------------------------------------------------------
 //! Widget Dependencies
 //-----------------------------------------------
-import { gui, debugObject } from "./gui";
-import * as MATERIAL from "../rendering/material";
-import * as MESH from "../scene/mesh";
-import { lights } from "../scene/scene";
+import { gui } from "./gui";
+import { lights, meshes } from "../scene/scene";
 import { LIGHT_TYPES } from "../scene/light";
 import { lightHelpers } from "../utils/helpers";
+import { MATERIAL_TYPES } from "../rendering/material";
 //-----------------------------------------------
 
 //! Widget Variables
@@ -17,6 +16,7 @@ var ambientGUI = null;
 var pointGUI = null;
 
 var objectGUI;
+var objectFolders = [];
 //-----------------------------------------------
 
 //! Widget Functions
@@ -98,144 +98,278 @@ function setupLightGUI() {
   }
 }
 
-function setupObjectsGUI() {
-  objectGUI = gui.addFolder("Objects");
-  objectGUI.add(MESH.ran, "visible").name("Random Geometry Visibility");
-  objectGUI
-    .addColor(debugObject, "color1")
-    .name("Color Material's Color")
-    .onChange((value) => {
-      MATERIAL.matColor.color.set(value);
-    });
-  objectGUI
-    .addColor(debugObject, "color2")
-    .name("Wireframe Material's Color")
-    .onChange((value) => {
-      MATERIAL.matWire.color.set(value);
-    });
-  objectGUI
-    .addColor(debugObject, "color3")
-    .name("Texture Material's Color")
-    .onChange((value) => {
-      MATERIAL.matTexture.color.set(value);
-    });
-  objectGUI
-    .add(MATERIAL.matTexture, "wireframe")
-    .name("Texture Material's Wireframe");
-  objectGUI
-    .addColor(debugObject, "color4")
-    .name("ComplexTex Material's Color")
-    .onChange((value) => {
-      MATERIAL.matTextureComplex.color.set(value);
-    });
-  objectGUI
-    .add(MATERIAL.matTextureComplex, "wireframe")
-    .name("ComplexTex Material's Wireframe");
-  objectGUI
-    .addColor(debugObject, "phongSpecular")
-    .name("Phong Material's Specular")
-    .onChange((value) => {
-      MATERIAL.matPhong.specular.set(value);
-    });
-  objectGUI
-    .add(MATERIAL.matPhong, "shininess")
-    .name("Phong Material's Shininess")
-    .min(0)
-    .max(512)
-    .step(2);
-  objectGUI
-    .add(debugObject, "sphereSubdivisions")
-    .name("Sphere Subdivisions")
-    .min(2)
-    .max(72)
+function setMeshGUI(parent, mesh) {
+  console.log(mesh);
+
+  parent.add(mesh.mesh, "visible").name("Visibility");
+}
+
+function setGeometryGUI(parent, geometry) {
+  console.log(geometry);
+
+  parent
+    .add(geometry, "subdivisions")
+    .name("Subdivisions")
+    .min(1)
+    .max(100)
     .step(1)
     .onChange((value) => {
-      MESH.sphere.geometry.dispose();
-      MESH.sphere.geometry = new THREE.SphereGeometry(1, value, value);
+      geometry.update();
     });
-  objectGUI
-    .addColor(debugObject, "color5")
-    .name("Lit Material's Color")
-    .onChange((value) => {
-      MATERIAL.matLit.color.set(value);
-    });
-  objectGUI
-    .add(MATERIAL.matLit, "metalness")
-    .name("Lit Material's Metalness")
-    .min(0)
-    .max(1)
-    .step(0.01);
-  objectGUI
-    .add(MATERIAL.matLit, "roughness")
-    .name("Lit Material's Roughness")
-    .min(0)
-    .max(1)
-    .step(0.01);
-  objectGUI.add(MATERIAL.matLit, "wireframe").name("Lit Material's Wireframe");
-  objectGUI
-    .add(MATERIAL.matLit, "flatShading")
-    .name("Lit Material's FlatShading")
-    .onChange(() => {
-      MATERIAL.matLit.needsUpdate = true;
-    });
+}
 
-  objectGUI
-    .addColor(debugObject, "color6")
-    .name("LitTex Material's Color")
-    .onChange((value) => {
-      MATERIAL.matLitTex.color.set(value);
-    });
-  objectGUI
-    .add(MATERIAL.matLitTex, "aoMapIntensity")
-    .name("LitTex Material's AO Intensity")
-    .min(0)
-    .max(2)
-    .step(0.01);
-  objectGUI
-    .add(MATERIAL.matLitTex, "displacementScale")
-    .name("LitTex Material's Height")
-    .min(0)
-    .max(2)
-    .step(0.01);
-  objectGUI
-    .add(MATERIAL.matLitTex, "metalness")
-    .name("LitTex Material's Metalness")
-    .min(0)
-    .max(2)
-    .step(0.01);
-  objectGUI
-    .add(MATERIAL.matLitTex, "roughness")
-    .name("LitTex Material's Roughness")
-    .min(0)
-    .max(2)
-    .step(0.01);
-  objectGUI
-    .add(debugObject, "normalX")
-    .name("LitTex Material's NormalX")
-    .min(0)
-    .max(2)
-    .step(0.01)
-    .onChange((value) => {
-      MATERIAL.matLitTex.normalScale.set(value, debugObject.normalY);
-    });
-  objectGUI
-    .add(debugObject, "normalY")
-    .name("LitTex Material's NormalY")
-    .min(0)
-    .max(2)
-    .step(0.01)
-    .onChange((value) => {
-      MATERIAL.matLitTex.normalScale.set(debugObject.normalX, value);
-    });
-  objectGUI
-    .add(MATERIAL.matLitTex, "wireframe")
-    .name("LitTex Material's Wireframe");
-  objectGUI
-    .add(MATERIAL.matLitTex, "flatShading")
-    .name("LitTex Material's FlatShading")
-    .onChange(() => {
-      MATERIAL.matLitTex.needsUpdate = true;
-    });
+function setMaterialGUI(parent, mat) {
+  console.log(mat);
+
+  switch (mat.type) {
+    case MATERIAL_TYPES.COLOR:
+    case MATERIAL_TYPES.WIRE:
+    case MATERIAL_TYPES.TEXTURE:
+      parent
+        .addColor(mat, "color")
+        .name("Color")
+        .onChange((value) => {
+          mat.mat.color.set(value);
+        });
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      break;
+
+    case MATERIAL_TYPES.BLEND_TEXTURE:
+      parent
+        .addColor(mat, "color")
+        .name("Color")
+        .onChange((value) => {
+          mat.mat.color.set(value);
+        });
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      parent
+        .add(mat.mat, "transparent")
+        .name("Transparent")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      break;
+
+    case MATERIAL_TYPES.NORMAL:
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      parent
+        .add(mat.mat, "flatShading")
+        .name("FlatShading")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      break;
+
+    case MATERIAL_TYPES.MATCAP:
+    case MATERIAL_TYPES.TEXT:
+      parent
+        .add(mat.mat, "flatShading")
+        .name("FlatShading")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      break;
+
+    case MATERIAL_TYPES.DEPTH:
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      break;
+
+    case MATERIAL_TYPES.LAMBERT:
+      parent
+        .addColor(mat, "color")
+        .name("Color")
+        .onChange((value) => {
+          mat.mat.color.set(value);
+        });
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      parent
+        .add(mat.mat, "flatShading")
+        .name("FlatShading")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      break;
+
+    case MATERIAL_TYPES.PHONG:
+      parent
+        .addColor(mat, "color")
+        .name("Color")
+        .onChange((value) => {
+          mat.mat.color.set(value);
+        });
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      parent
+        .add(mat.mat, "flatShading")
+        .name("FlatShading")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      parent
+        .addColor(mat, "specularColor")
+        .name("Specular")
+        .onChange((value) => {
+          mat.mat.specular.set(value);
+        });
+      parent
+        .add(mat.mat, "shininess")
+        .name("Shininess")
+        .min(0)
+        .max(512)
+        .step(2);
+      break;
+
+    case MATERIAL_TYPES.TOON:
+      parent
+        .addColor(mat, "color")
+        .name("Color")
+        .onChange((value) => {
+          mat.mat.color.set(value);
+        });
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      break;
+
+    case MATERIAL_TYPES.LIT:
+      parent
+        .addColor(mat, "color")
+        .name("Color")
+        .onChange((value) => {
+          mat.mat.color.set(value);
+        });
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      parent
+        .add(mat.mat, "flatShading")
+        .name("FlatShading")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      parent
+        .add(mat.mat, "metalness")
+        .name("Metalness")
+        .min(0)
+        .max(1)
+        .step(0.01);
+      parent
+        .add(mat.mat, "roughness")
+        .name("Roughness")
+        .min(0)
+        .max(1)
+        .step(0.01);
+      break;
+
+    case MATERIAL_TYPES.LIT_TEXTURE:
+      parent
+        .addColor(mat, "color")
+        .name("Color")
+        .onChange((value) => {
+          mat.mat.color.set(value);
+        });
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      parent
+        .add(mat.mat, "transparent")
+        .name("Transparent")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      parent
+        .add(mat.mat, "flatShading")
+        .name("FlatShading")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      parent
+        .add(mat.mat, "aoMapIntensity")
+        .name("AO Intensity")
+        .min(0)
+        .max(2)
+        .step(0.01);
+      parent
+        .add(mat.mat, "displacementScale")
+        .name("Height")
+        .min(0)
+        .max(2)
+        .step(0.01);
+      parent
+        .add(mat.mat, "metalness")
+        .name("Metalness")
+        .min(0)
+        .max(2)
+        .step(0.01);
+      parent
+        .add(mat.mat, "roughness")
+        .name("Roughness")
+        .min(0)
+        .max(2)
+        .step(0.01);
+      parent
+        .add(mat, "normalX")
+        .name("Normal X")
+        .min(0)
+        .max(2)
+        .step(0.01)
+        .onChange((value) => {
+          mat.mat.normalScale.set(value, mat.normalY);
+        });
+      parent
+        .add(mat, "normalY")
+        .name("Normal Y")
+        .min(0)
+        .max(2)
+        .step(0.01)
+        .onChange((value) => {
+          mat.mat.normalScale.set(mat.normalX, value);
+        });
+      break;
+
+    case MATERIAL_TYPES.PHYSIC:
+      parent
+        .addColor(mat, "color")
+        .name("Color")
+        .onChange((value) => {
+          mat.mat.color.set(value);
+        });
+      parent.add(mat.mat, "wireframe").name("Wireframe");
+      parent
+        .add(mat.mat, "flatShading")
+        .name("FlatShading")
+        .onChange(() => {
+          mat.mat.needsUpdate = true;
+        });
+      parent
+        .add(mat.mat, "metalness")
+        .name("Metalness")
+        .min(0)
+        .max(1)
+        .step(0.01);
+      parent
+        .add(mat.mat, "roughness")
+        .name("Roughness")
+        .min(0)
+        .max(1)
+        .step(0.01);
+      parent
+        .add(mat.mat, "clearcoat")
+        .name("Clearcoat")
+        .min(0)
+        .max(1)
+        .step(0.01);
+      break;
+
+    default:
+      break;
+  }
+}
+
+function setupObjectsGUI() {
+  objectGUI = gui.addFolder("Objects");
+
+  for (var i = 0; i < meshes.length; i++) {
+    var mesh = meshes[i];
+    var folder = objectGUI.addFolder("Mesh #" + (i + 1));
+    setMeshGUI(folder, mesh); // Send Mesh Class
+    setGeometryGUI(folder, mesh.geometry); // Send Geomtery Class
+    setMaterialGUI(folder, mesh.material); // Send Material Class
+    objectFolders.push(folder);
+  }
 }
 
 function setupMiscGUI() {}

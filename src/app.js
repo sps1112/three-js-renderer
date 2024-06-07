@@ -5,7 +5,7 @@ import "../styles.css";
 import * as THREE from "three";
 import gsap from "gsap";
 import { setupOrbitalControls, updateControls } from "./utils/controls";
-import { gui, debugObject, setupGUI } from "./gui/gui";
+import { setupGUI } from "./gui/gui";
 import { setupLoaders } from "./utils/loader";
 import * as GEOMETRY from "./rendering/geometry";
 import * as TEXTURE from "./rendering/texture";
@@ -17,6 +17,7 @@ import * as LIGHT from "./scene/light";
 import { setupLightGUI, setupObjectsGUI } from "./gui/widget";
 import { Timer } from "./rendering/renderer";
 import { setupHelpers, setupLightHelpers } from "./utils/helpers";
+import { fonts, loadFont } from "./rendering/font";
 
 // Define the Canvas
 const canvasSize = {
@@ -32,6 +33,7 @@ window.addEventListener("dblclick", processDoubleClick);
 
 // Create GUI
 setupGUI(canvasSize.width / 4.0);
+
 // Define the Renderer
 const renderer = new THREE.WebGLRenderer({
   canvas: canvas,
@@ -73,9 +75,9 @@ SCENE.setupScene();
 // Texture Loading
 //------------------------------------------------------
 setupLoaders();
-
 TEXTURE.setupTextures();
-
+loadFont("fonts/helvetiker_regular.typeface.json");
+loadFont("fonts/helvetiker_bold.typeface.json");
 //------------------------------------------------------
 
 // // Define Camera Settings
@@ -158,10 +160,34 @@ const camera = new CAMERA.PerspectiveCam(60, aspectRatio, 0.1, 1000, 5);
 // const camera = new CAMERA.OrthographicCam(orthoSize, aspectRatio, 0.1, 1000, 5);
 SCENE.scene.add(camera.cam);
 
-GEOMETRY.setupGeometry();
-MATERIAL.setupMaterials();
 SCENE.setEnvironment();
-SCENE.populateScene();
+SCENE.addMesh(
+  new MESH.Mesh(
+    new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.SPHERE, 24),
+    new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0x0066ff)
+  )
+);
+
+// SCENE.addMesh(
+//   new MESH.Mesh(
+//     new GEOMETRY.GeometryText(6, "Siddhart", fonts[0]),
+//     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.TEXT, 0x0066ff)
+//   )
+// );
+
+// SCENE.addMesh(
+//   new MESH.Mesh(
+//     new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.CUBE, 5),
+//     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.PHYSIC, 0x0055ff)
+//   )
+// );
+
+// SCENE.addMesh(
+//   new MESH.Mesh(
+//     new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.TORUS, 24),
+//     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT_TEXTURE, 0x991122)
+//   )
+// );
 
 // Define Lights
 SCENE.addLight(new LIGHT.AmbientLight(0xffffff, 0.5));
@@ -183,7 +209,7 @@ const rpm = {
 };
 
 // Define controls
-setupOrbitalControls(camera.cam, canvas, MESH.group);
+setupOrbitalControls(camera.cam, canvas, SCENE.group);
 
 // Define Animations
 // gsap.to(cube.position, { duration: 1, delay: 0.5, y: 2 });
@@ -194,25 +220,25 @@ setupOrbitalControls(camera.cam, canvas, MESH.group);
 setupLightGUI();
 setupObjectsGUI();
 
-const otherGUI = gui.addFolder("Misc");
-otherGUI.add(rpm, "group").name("Group RPM").min(-120).max(120).step(0.1);
-otherGUI.add(rpm, "torus").name("Torus RPM").min(-120).max(120).step(0.1);
-otherGUI.add(rpm, "sphere").name("Sphere RPM").min(-120).max(120).step(0.1);
-otherGUI
-  .add(MESH.sphere.position, "x")
-  .name("Sphere X")
-  .min(-5)
-  .max(5)
-  .step(0.01);
+// const otherGUI = gui.addFolder("Misc");
+// otherGUI.add(rpm, "group").name("Group RPM").min(-120).max(120).step(0.1);
+// otherGUI.add(rpm, "torus").name("Torus RPM").min(-120).max(120).step(0.1);
+// otherGUI.add(rpm, "sphere").name("Sphere RPM").min(-120).max(120).step(0.1);
+// otherGUI
+//   .add(MESH.sphere.position, "x")
+//   .name("Sphere X")
+//   .min(-5)
+//   .max(5)
+//   .step(0.01);
 
-debugObject.spin = () => {
-  gsap.to(MESH.group.rotation, {
-    duration: 1.0,
-    delay: 0.0,
-    z: MESH.group.rotation.z + Math.PI,
-  });
-};
-otherGUI.add(debugObject, "spin").name("Spin Group");
+// debugObject.spin = () => {
+//   gsap.to(SCENE.group.rotation, {
+//     duration: 1.0,
+//     delay: 0.0,
+//     z: SCENE.group.rotation.z + Math.PI,
+//   });
+// };
+// otherGUI.add(debugObject, "spin").name("Spin Group");
 //-----------------------------------------------
 
 // Render Loop
@@ -230,12 +256,12 @@ var update = function () {
   // camera.lookAt(group.position);
 
   // Do object calculations
-  MESH.cube.rotateX(((2 * Math.PI * rpm.cubeX) / 60.0) * timer.deltaTime);
-  MESH.cube.rotateY(((2 * Math.PI * rpm.cubeY) / 60.0) * timer.deltaTime);
-  MESH.sphere.rotateY(((2 * Math.PI * rpm.sphere) / 60.0) * timer.deltaTime);
-  MESH.torus.position.y = 2.0 * Math.sin(1.0 * timer.currTime);
-  MESH.torus.rotateX(((2 * Math.PI * rpm.torus) / 60.0) * timer.deltaTime);
-  MESH.group.rotateZ(((2 * Math.PI * rpm.group) / 60.0) * timer.deltaTime);
+  // MESH.cube.rotateX(((2 * Math.PI * rpm.cubeX) / 60.0) * timer.deltaTime);
+  // MESH.cube.rotateY(((2 * Math.PI * rpm.cubeY) / 60.0) * timer.deltaTime);
+  // MESH.sphere.rotateY(((2 * Math.PI * rpm.sphere) / 60.0) * timer.deltaTime);
+  // MESH.torus.position.y = 2.0 * Math.sin(1.0 * timer.currTime);
+  // MESH.torus.rotateX(((2 * Math.PI * rpm.torus) / 60.0) * timer.deltaTime);
+  // SCENE.group.rotateZ(((2 * Math.PI * rpm.group) / 60.0) * timer.deltaTime);
 
   // Update controls
   updateControls();

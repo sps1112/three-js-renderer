@@ -3,14 +3,14 @@
 //! Scene Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
-import * as MESH from "./mesh";
 import { rgbeLoader } from "../utils/loader";
-import { loadFont } from "../rendering/font";
 //-----------------------------------------------
 
 //! Scene Variables
 //-----------------------------------------------
 var scene;
+var group;
+var meshes;
 var lights;
 //-----------------------------------------------
 
@@ -18,7 +18,13 @@ var lights;
 //-----------------------------------------------
 function setupScene() {
   scene = new THREE.Scene();
+
+  group = new THREE.Group();
+  group.position.y = 1.0;
+  scene.add(group);
+
   lights = [];
+  meshes = [];
 }
 
 function setEnvironment() {
@@ -29,38 +35,30 @@ function setEnvironment() {
   });
 }
 
+function addToScene(object) {
+  group.add(object);
+}
+
+function addMesh(mesh) {
+  meshes.push(mesh);
+  addToScene(mesh.mesh);
+}
+
 function addLight(light) {
   lights.push(light);
-  scene.add(light.light);
+  addToScene(light.light);
 }
-
-function logLights() {
-  for (var i = 0; i < lights.length; i++) {
-    var light = lights[i];
-    console.log(i + " " + light.color + " " + light.light.intensity);
-  }
-}
-
-function populateScene() {
-  MESH.setupGroup();
-  MESH.group.position.y = 1.0;
-  scene.add(MESH.group);
-
-  MESH.setupMeshes();
-  loadFont("fonts/helvetiker_regular.typeface.json", "Siddhartha");
-}
-
-function refreshScene() {}
 //-----------------------------------------------
 
 export {
   scene,
+  group,
   setupScene,
-  refreshScene,
-  populateScene,
   setEnvironment,
+  addToScene,
+  meshes,
+  addMesh,
   lights,
   addLight,
-  logLights,
 };
 //---------------------------------------------------------------

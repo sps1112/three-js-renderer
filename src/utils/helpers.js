@@ -3,7 +3,7 @@
 //! Helpers Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
-import { scene, lights } from "../scene/scene";
+import { scene, lights, addToScene } from "../scene/scene";
 import { LIGHT_TYPES } from "../scene/light";
 //-----------------------------------------------
 
@@ -32,7 +32,7 @@ function setupLightHelpers() {
         light.color
       );
       lightHelpers.push(lightHelper);
-      scene.add(lightHelper);
+      addToScene(lightHelper);
     }
   }
 }

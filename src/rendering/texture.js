@@ -18,6 +18,7 @@ var roughnessTexture;
 var minecraftTexture;
 var matcapTexture;
 var gradTexture;
+var textTexture;
 //-----------------------------------------------
 
 //! Texture Functions
@@ -41,13 +42,16 @@ function setupTextures() {
   minecraftTexture.minFilter = THREE.NearestFilter;
   minecraftTexture.magFilter = THREE.NearestFilter;
 
-  matcapTexture = textureLoader.load("textures/matcaps/8.png");
+  matcapTexture = textureLoader.load("textures/matcaps/5.png");
   matcapTexture.colorSpace = THREE.SRGBColorSpace;
 
   gradTexture = textureLoader.load("textures/gradients/5.jpg");
   gradTexture.generateMipmaps = false;
   gradTexture.minFilter = THREE.NearestFilter;
   gradTexture.magFilter = THREE.NearestFilter;
+
+  textTexture = textureLoader.load("textures/matcaps/8.png");
+  textTexture.colorSpace = THREE.SRGBColorSpace;
 }
 //-----------------------------------------------
 
@@ -63,5 +67,6 @@ export {
   minecraftTexture,
   matcapTexture,
   gradTexture,
+  textTexture,
 };
 //---------------------------------------------------------------

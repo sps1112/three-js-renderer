@@ -3,23 +3,38 @@
 //! Font Dependencies
 //-----------------------------------------------
 import { fontLoader } from "../utils/loader";
-import { setupTextGeometry } from "./geometry";
-import { setupTextMesh } from "../scene/mesh";
 //-----------------------------------------------
 
 //! Font Variables
 //-----------------------------------------------
+class Font {
+  constructor(path) {
+    this.path = path;
+    this.font = null;
+    this.loaded = false;
+    this.callbacks = [];
+
+    fontLoader.load(path, (font) => {
+      this.font = font;
+      this.loaded = true;
+      this.callbacks.forEach((callback) => callback());
+    });
+  }
+
+  setCallback(callback) {
+    this.callbacks.push(callback);
+  }
+}
+
+var fonts = [];
 //-----------------------------------------------
 
 //! Font Functions
 //-----------------------------------------------
-function loadFont(path, text) {
-  fontLoader.load(path, (font) => {
-    setupTextGeometry(text, font);
-    setupTextMesh();
-  });
+function loadFont(path) {
+  fonts.push(new Font(path));
 }
 //-----------------------------------------------
 
-export { loadFont };
+export { fonts, loadFont };
 //---------------------------------------------------------------

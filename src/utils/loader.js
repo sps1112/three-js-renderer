@@ -20,16 +20,16 @@ var fontLoader;
 function setupLoaders() {
   loadingManager = new THREE.LoadingManager();
   loadingManager.onStart = () => {
-    console.log("Start to load asset");
+    console.log("Start to load asset.");
   };
   loadingManager.onProgress = () => {
-    console.log("Loading asset");
+    console.log("Loading asset...");
   };
   loadingManager.onLoad = () => {
-    console.log("Loaded Assets Succesfully");
+    console.log("Loaded Assets Succesfully!");
   };
   loadingManager.onError = () => {
-    console.log("Error!!! Asset could not be loaded");
+    console.log("Error!!! Asset could not be loaded.");
   };
 
   textureLoader = new THREE.TextureLoader(loadingManager);

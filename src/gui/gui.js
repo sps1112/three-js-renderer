@@ -8,7 +8,6 @@ import GUI from "lil-gui";
 //! Gui Variables
 //-----------------------------------------------
 var gui;
-var debugObject = {};
 //-----------------------------------------------
 
 //! Gui Functions
@@ -29,5 +28,5 @@ function setupGUI(size) {
 }
 //-----------------------------------------------
 
-export { gui, debugObject, setupGUI };
+export { gui, setupGUI };
 //---------------------------------------------------------------

@@ -15,6 +15,7 @@ import { setupLightGUI, setupObjectsGUI } from "./gui/widget";
 import { setupHelpers, setupLightHelpers } from "./utils/helpers";
 import { fonts, loadFont } from "./rendering/font";
 import * as PHYSICS from "./physics/physics";
+import { checkKey, checkKeyDown, checkKeyUp } from "./utils/controls";
 
 // Setup Renderer components
 RENDERER.setupRenderer();
@@ -117,7 +118,25 @@ setupObjectsGUI();
 RENDERER.startRenderLoop([
   PHYSICS.updateWorld,
   (delta) => {
-    SCENE.meshes[0].mesh.position.x += 0.0 * delta;
+    var speed = 5.0;
+    if (checkKey("d")) {
+      SCENE.meshes[0].mesh.position.x += speed * delta;
+    }
+    if (checkKey("a")) {
+      SCENE.meshes[0].mesh.position.x -= speed * delta;
+    }
+    if (checkKey("s")) {
+      SCENE.meshes[0].mesh.position.z += speed * delta;
+    }
+    if (checkKey("w")) {
+      SCENE.meshes[0].mesh.position.z -= speed * delta;
+    }
+    if (checkKeyDown("q")) {
+      SCENE.meshes[0].mesh.position.y += speed / 2.0;
+    }
+    if (checkKeyUp("e")) {
+      SCENE.meshes[0].mesh.position.y -= speed / 2.0;
+    }
   },
 ]);
 //-----------------------------------------------

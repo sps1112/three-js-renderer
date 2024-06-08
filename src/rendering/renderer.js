@@ -5,7 +5,17 @@
 import * as THREE from "three";
 import { scene, group } from "../scene/scene";
 import { PerspectiveCam, OrthographicCam } from "../scene/camera";
-import { setupOrbitalControls, updateControls } from "../utils/controls";
+import {
+  checkKey,
+  checkMouseButton,
+  checkMouseButtonDown,
+  checkMouseButtonUp,
+  logMouse,
+  setupOrbitalControls,
+  startInput,
+  updateControls,
+} from "../utils/controls";
+import { updateGUI } from "../gui/gui";
 //-----------------------------------------------
 
 //! Renderer Variables
@@ -95,7 +105,8 @@ function processDoubleClick() {
 function startRenderLoop(list) {
   timer = new Timer();
   callbacks = list;
-  setupOrbitalControls(camera.cam, canvas, group);
+  // setupOrbitalControls(camera.cam, canvas, group);
+  startInput();
   renderLoop();
 }
 
@@ -107,13 +118,32 @@ function renderLoop() {
   // Execute callbacks (like object calculations)
   callbacks.forEach((callback) => callback(timer.deltaTime));
 
-  // Update controls
-  updateControls();
+  // Check Input
+  if (checkKey("z")) {
+    // console.log(checkMouseButton(0));
+    // console.log(checkMouseButton(1));
+    // console.log(checkMouseButton(2));
+    logMouse();
+  }
+
+  if (checkMouseButton(0)) {
+    camera.cam.position.x -= 5.0 * timer.deltaTime;
+  }
+  if (checkMouseButton(1)) {
+    camera.cam.position.x = 5.0;
+  }
+  if (checkMouseButton(2)) {
+    camera.cam.position.x += 5.0 * timer.deltaTime;
+  }
 
   // Render the scene
   renderer.render(scene, camera.cam);
 
-  // Setup callback
+  // Update GUI()
+  updateGUI();
+
+  // End frame
+  updateControls(canvasSize);
   window.requestAnimationFrame(renderLoop);
 }
 //-----------------------------------------------

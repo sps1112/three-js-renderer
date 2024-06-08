@@ -4,6 +4,7 @@
 //-----------------------------------------------
 import * as RAPIER from "@dimforge/rapier3d";
 import { Rigidbody } from "./rigidbody";
+import { checkKeyUp } from "../utils/controls";
 //-----------------------------------------------
 
 //! Physics Variables
@@ -25,11 +26,6 @@ function setupPhysics() {
   colliders = [];
 
   toSimulate = false;
-  window.addEventListener("keydown", (event) => {
-    if (event.key == "p") {
-      toSimulate = !toSimulate;
-    }
-  });
 }
 
 function addCollider(data) {}
@@ -73,6 +69,10 @@ function updateWorld(delta) {
     rigidbodies.forEach((rb) => {
       rb.refreshMesh();
     });
+  }
+
+  if (checkKeyUp("p")) {
+    toSimulate = !toSimulate;
   }
 }
 //-----------------------------------------------

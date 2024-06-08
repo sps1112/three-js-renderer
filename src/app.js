@@ -11,10 +11,9 @@ import * as MESH from "./scene/mesh";
 import * as SCENE from "./scene/scene";
 import * as LIGHT from "./scene/light";
 import * as RENDERER from "./rendering/renderer";
-import { setupLightGUI, setupObjectsGUI } from "./gui/widget";
 import { setupHelpers, setupLightHelpers } from "./utils/helpers";
 import { fonts, loadFont } from "./rendering/font";
-import * as PHYSICS from "./physics/physics";
+import * as SIM from "./physics/simulation";
 import { checkKey, checkKeyDown, checkKeyUp } from "./utils/controls";
 
 // Page setup
@@ -40,9 +39,9 @@ SCENE.setEnvironment();
 // Add objects
 SCENE.addMesh(
   new MESH.Mesh(
-    new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.CUBE, 2),
+    new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.CAPSULE, 2),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LAMBERT, 0x2299ff),
-    [1, 4.0, 0],
+    [1, 4.0, 5],
     [0, 0, 0],
     [1, 1, 1]
   )
@@ -53,8 +52,18 @@ SCENE.addMesh(
     new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.PLANE, 1),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LAMBERT, 0xbb9933),
     [0, 0, 0],
-    [-Math.PI / 2.0, 0, 0],
-    [10, 10, 1]
+    [0, 0, 0],
+    [4, 1, 4]
+  )
+);
+
+SCENE.addMesh(
+  new MESH.Mesh(
+    new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.CUBE, 1),
+    new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LAMBERT, 0xff2233),
+    [0, 5, -9.9],
+    [0, 0, 0],
+    [20, 10, 1]
   )
 );
 
@@ -109,17 +118,13 @@ setupLightHelpers();
 //-------------------------------------------
 
 // Setup Physics for the scene
-PHYSICS.setupPhysics();
-PHYSICS.addRigidbody(SCENE.meshes[0]);
-
-// Setup GUI for scene
-setupLightGUI();
-setupObjectsGUI();
+SIM.setupSimulation();
+SIM.addRigidbody(SCENE.meshes[0], SCENE.meshes[1], SCENE.meshes[2]);
 
 // Start Loop
-// PHYSICS.startSimulation();
+// SIM.startSimulation();
 RENDERER.startRenderLoop([
-  PHYSICS.updateWorld,
+  SIM.updateWorld,
   (delta) => {
     var speed = 5.0;
     if (checkKey("d")) {

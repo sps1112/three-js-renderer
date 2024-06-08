@@ -18,22 +18,24 @@ class Rigidbody {
   }
 
   refreshMesh() {
-    this.mesh.updateTransform(
-      [
-        this.rigidbody.translation().x,
-        this.rigidbody.translation().y,
-        this.rigidbody.translation().z,
-      ],
-      this.mesh.rotation,
-      this.mesh.scale
-    );
+    this.mesh.updatePosition([
+      this.collider.collider.translation().x,
+      this.collider.collider.translation().y,
+      this.collider.collider.translation().z,
+    ]);
+    // console.log(this.collider.collider.rotation());
+    this.mesh.updateQuaternion([
+      this.collider.collider.rotation().x,
+      this.collider.collider.rotation().y,
+      this.collider.collider.rotation().z,
+      this.collider.collider.rotation().w,
+    ]);
   }
 }
 //-----------------------------------------------
 
 //! Rigidbody Functions
 //-----------------------------------------------
-function convertToEuler(quaternion) {}
 //-----------------------------------------------
 
 export { Rigidbody };

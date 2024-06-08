@@ -69,7 +69,7 @@ class Camera {
 
   updateDistance(diff) {
     this.distance += diff;
-    this.distance = clamp(this.distance, 1.0, 30.0);
+    this.distance = clamp(this.distance, 0.1, 30.0);
   }
 }
 

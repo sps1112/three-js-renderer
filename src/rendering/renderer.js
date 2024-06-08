@@ -17,6 +17,8 @@ import {
   updateControls,
 } from "../utils/controls";
 import { updateGUI } from "../gui/gui";
+import { updateSceneGUI } from "../gui/widget";
+import { setSceneGUI, setupLightGUI, setupObjectsGUI } from "../gui/widget";
 //-----------------------------------------------
 
 //! Renderer Variables
@@ -109,6 +111,11 @@ function startRenderLoop(list) {
   camera.setProperties(8.0, Math.PI / 3.0, Math.PI / 6.0, 0.1, 0.5);
   camera.setTarget(meshes[0]);
 
+  // Setup GUI for scene
+  setSceneGUI();
+  setupObjectsGUI();
+  setupLightGUI();
+
   startInput();
   renderLoop();
 }
@@ -138,6 +145,7 @@ function renderLoop() {
 
   // End frame
   updateGUI();
+  updateSceneGUI();
   updateControls(canvasSize);
   window.requestAnimationFrame(renderLoop);
 }

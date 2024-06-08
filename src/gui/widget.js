@@ -7,6 +7,7 @@ import { lights, meshes } from "../scene/scene";
 import { LIGHT_TYPES } from "../scene/light";
 import { lightHelpers } from "../utils/helpers";
 import { MATERIAL_TYPES } from "../rendering/material";
+import { camera } from "../rendering/renderer";
 //-----------------------------------------------
 
 //! Widget Variables
@@ -16,6 +17,10 @@ var lightFolders = [];
 
 var objectGUI;
 var objectFolders = [];
+
+var sceneGUI;
+var sceneFolder = [];
+var sceneControllers = [];
 //-----------------------------------------------
 
 //! Widget Functions
@@ -83,23 +88,44 @@ function setupLightGUI() {
 }
 
 function setMeshGUI(parent, mesh) {
+  var uiController = [];
+
   var pos = parent.addFolder("Position");
-  pos.add(mesh.mesh.position, "x").name("X").min(-10).max(10).step(0.1);
-  pos.add(mesh.mesh.position, "y").name("Y").min(-10).max(10).step(0.1);
-  pos.add(mesh.mesh.position, "z").name("Z").min(-10).max(10).step(0.1);
+  uiController.push(
+    pos.add(mesh.mesh.position, "x").name("X").min(-10).max(10).step(0.1)
+  );
+  uiController.push(
+    pos.add(mesh.mesh.position, "y").name("Y").min(-10).max(10).step(0.1)
+  );
+  uiController.push(
+    pos.add(mesh.mesh.position, "z").name("Z").min(-10).max(10).step(0.1)
+  );
 
   var rot = parent.addFolder("Rotation");
-  rot.add(mesh.mesh.rotation, "x").name("X").min(-180).max(180).step(0.1);
-  rot.add(mesh.mesh.rotation, "y").name("Y").min(-180).max(180).step(0.1);
-  rot.add(mesh.mesh.rotation, "z").name("Z").min(-180).max(180).step(0.1);
+  uiController.push(
+    rot.add(mesh.mesh.rotation, "x").name("X").min(-180).max(180).step(0.1)
+  );
+  uiController.push(
+    rot.add(mesh.mesh.rotation, "y").name("Y").min(-180).max(180).step(0.1)
+  );
+  uiController.push(
+    rot.add(mesh.mesh.rotation, "z").name("Z").min(-180).max(180).step(0.1)
+  );
 
   var scale = parent.addFolder("Scale");
-  scale.add(mesh.mesh.scale, "x").name("X").min(-10).max(10).step(0.1);
-  scale.add(mesh.mesh.scale, "y").name("Y").min(-10).max(10).step(0.1);
-  scale.add(mesh.mesh.scale, "z").name("Z").min(-10).max(10).step(0.1);
+  uiController.push(
+    scale.add(mesh.mesh.scale, "x").name("X").min(-10).max(10).step(0.1)
+  );
+  uiController.push(
+    scale.add(mesh.mesh.scale, "y").name("Y").min(-10).max(10).step(0.1)
+  );
+  uiController.push(
+    scale.add(mesh.mesh.scale, "z").name("Z").min(-10).max(10).step(0.1)
+  );
 
   parent.add(mesh, "resetTransform").name("Reset Transform");
   parent.add(mesh.mesh, "visible").name("Visibility");
+  mesh.setGUI(uiController);
 }
 
 function setGeometryGUI(parent, geometry) {
@@ -365,7 +391,34 @@ function setupObjectsGUI() {
     objectFolders.push(folder);
   }
 }
+
+function setSceneGUI() {
+  sceneGUI = gui.addFolder("Scene");
+
+  var cameraGUI = sceneGUI.addFolder("Camera");
+  sceneControllers.push(
+    cameraGUI
+      .add(camera, "distance")
+      .name("Distance")
+      .min(0.1)
+      .max(30)
+      .step(0.1)
+  );
+  sceneControllers.push(
+    cameraGUI
+      .add(camera, "dampness")
+      .name("Dampness")
+      .min(0.0)
+      .max(0.2)
+      .step(0.001)
+  );
+  sceneFolder.push(cameraGUI);
+}
+
+function updateSceneGUI() {
+  sceneControllers.forEach((controller) => controller.updateDisplay());
+}
 //-----------------------------------------------
 
-export { setupObjectsGUI, setupLightGUI };
+export { setupObjectsGUI, setupLightGUI, setSceneGUI, updateSceneGUI };
 //---------------------------------------------------------------

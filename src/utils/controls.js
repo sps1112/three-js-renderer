@@ -206,6 +206,10 @@ function onMouseUp(event) {
   if (!mouse.left && !mouse.right) {
     mouse.moving = false;
     document.removeEventListener("mousemove", onMouseMove, false);
+    mouse.diff = {
+      x: 0.0,
+      y: 0.0,
+    };
     if (!mouse.middle) {
       document.removeEventListener("mouseup", onMouseUp, false);
     }
@@ -266,17 +270,27 @@ function checkMouseButtonUp(button) {
       break;
   }
 }
+
+function checkMouseMove() {
+  return mouse.diff;
+}
+
+function checkMouseScroll() {
+  return mouse.scroll;
+}
 //-----------------------------------------------
 export {
+  setupOrbitalControls,
   startInput,
+  updateControls,
   checkKey,
   checkKeyDown,
   checkKeyUp,
-  setupOrbitalControls,
-  updateControls,
   logMouse,
   checkMouseButton,
   checkMouseButtonDown,
   checkMouseButtonUp,
+  checkMouseMove,
+  checkMouseScroll,
 };
 //---------------------------------------------------------------

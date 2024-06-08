@@ -3,10 +3,11 @@
 //! Renderer Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
-import { scene, group } from "../scene/scene";
+import { scene, group, meshes } from "../scene/scene";
 import { PerspectiveCam, OrthographicCam } from "../scene/camera";
 import {
   checkKey,
+  checkKeyDown,
   checkMouseButton,
   checkMouseButtonDown,
   checkMouseButtonUp,
@@ -61,7 +62,6 @@ function setupRenderer() {
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
 
   window.addEventListener("resize", resizeRenderer);
-  window.addEventListener("dblclick", processDoubleClick);
 }
 
 function setCamera() {
@@ -84,7 +84,7 @@ function resizeRenderer() {
   camera.update(canvasSize.width / canvasSize.height);
 }
 
-function processDoubleClick() {
+function updateFullScreen() {
   const fullscreenElement =
     document.fullscreenElement || document.webkitFullscreenElement;
   if (!fullscreenElement) {
@@ -106,6 +106,9 @@ function startRenderLoop(list) {
   timer = new Timer();
   callbacks = list;
   // setupOrbitalControls(camera.cam, canvas, group);
+  camera.setProperties(8.0, Math.PI / 3.0, Math.PI / 6.0, 0.1, 0.5);
+  camera.setTarget(meshes[0]);
+
   startInput();
   renderLoop();
 }
@@ -119,30 +122,22 @@ function renderLoop() {
   callbacks.forEach((callback) => callback(timer.deltaTime));
 
   // Check Input
-  if (checkKey("z")) {
-    // console.log(checkMouseButton(0));
-    // console.log(checkMouseButton(1));
-    // console.log(checkMouseButton(2));
-    logMouse();
+  if (checkKeyDown("f")) {
+    updateFullScreen();
   }
-
-  if (checkMouseButton(0)) {
-    camera.cam.position.x -= 5.0 * timer.deltaTime;
+  if (checkKeyDown("z")) {
+    camera.setTarget(meshes[1]);
   }
-  if (checkMouseButton(1)) {
-    camera.cam.position.x = 5.0;
-  }
-  if (checkMouseButton(2)) {
-    camera.cam.position.x += 5.0 * timer.deltaTime;
+  if (checkKeyDown("x")) {
+    camera.setTarget(meshes[0]);
   }
 
   // Render the scene
+  camera.updateLookAt(timer.deltaTime);
   renderer.render(scene, camera.cam);
 
-  // Update GUI()
-  updateGUI();
-
   // End frame
+  updateGUI();
   updateControls(canvasSize);
   window.requestAnimationFrame(renderLoop);
 }

@@ -17,6 +17,9 @@ import { fonts, loadFont } from "./rendering/font";
 import * as PHYSICS from "./physics/physics";
 import { checkKey, checkKeyDown, checkKeyUp } from "./utils/controls";
 
+// Page setup
+window.addEventListener("contextmenu", (e) => e.preventDefault());
+
 // Setup Renderer components
 RENDERER.setupRenderer();
 setupGUI();
@@ -39,7 +42,7 @@ SCENE.addMesh(
   new MESH.Mesh(
     new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.CUBE, 2),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LAMBERT, 0x2299ff),
-    [0, 4.5, 0],
+    [1, 4.0, 0],
     [0, 0, 0],
     [1, 1, 1]
   )

@@ -103,13 +103,28 @@ function setMeshGUI(parent, mesh) {
 
   var rot = parent.addFolder("Rotation");
   uiController.push(
-    rot.add(mesh.mesh.rotation, "x").name("X").min(-180).max(180).step(0.1)
+    rot
+      .add(mesh.mesh.rotation, "x")
+      .name("X")
+      .min(-Math.PI / 2.0)
+      .max(Math.PI / 2.0)
+      .step(0.1)
   );
   uiController.push(
-    rot.add(mesh.mesh.rotation, "y").name("Y").min(-180).max(180).step(0.1)
+    rot
+      .add(mesh.mesh.rotation, "y")
+      .name("Y")
+      .min(-Math.PI / 2.0)
+      .max(Math.PI / 2.0)
+      .step(0.1)
   );
   uiController.push(
-    rot.add(mesh.mesh.rotation, "z").name("Z").min(-180).max(180).step(0.1)
+    rot
+      .add(mesh.mesh.rotation, "z")
+      .name("Z")
+      .min(-Math.PI / 2.0)
+      .max(Math.PI / 2.0)
+      .step(0.1)
   );
 
   var scale = parent.addFolder("Scale");

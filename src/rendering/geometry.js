@@ -16,7 +16,8 @@ var GEOMETRY_TYPES = {
   TORUS: 4,
   CAPSULE: 5,
   CYLINDER: 6,
-  TEXT: 7,
+  CONE: 7,
+  TEXT: 8,
 };
 
 class Geometry {
@@ -98,6 +99,15 @@ class Geometry {
           1.0,
           2.0,
           this.subdivisions * 9.0,
+          this.subdivisions
+        );
+        break;
+
+      case GEOMETRY_TYPES.CONE:
+        this.geometry = new THREE.ConeGeometry(
+          1.0,
+          2.0,
+          this.subdivisions * 6,
           this.subdivisions
         );
         break;

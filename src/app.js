@@ -39,11 +39,11 @@ SCENE.setEnvironment();
 // Add objects
 SCENE.addMesh(
   new MESH.Mesh(
-    new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.CAPSULE, 2),
+    new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.CONE, 1),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LAMBERT, 0x2299ff),
-    [1, 4.0, 5],
-    [0, 0, 0],
-    [1, 1, 1]
+    [1, 4.0, 8],
+    [Math.PI, 0, 0],
+    [1, 0.5, 1]
   )
 );
 
@@ -61,7 +61,7 @@ SCENE.addMesh(
   new MESH.Mesh(
     new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.CUBE, 1),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LAMBERT, 0xff2233),
-    [0, 5, -9.9],
+    [0, 5, -9.5],
     [0, 0, 0],
     [20, 10, 1]
   )
@@ -113,7 +113,7 @@ SCENE.addLight(new LIGHT.PointLight(0xffffff, 30, 200, [2, 3, 4]));
 // SCENE.addLight(new LIGHT.PointLight(0x550099, 15, 200, [-2, 2, 2]));
 
 // Add other utilities
-setupHelpers();
+// setupHelpers();
 setupLightHelpers();
 //-------------------------------------------
 
@@ -139,11 +139,11 @@ RENDERER.startRenderLoop([
     if (checkKey("w")) {
       SCENE.meshes[0].mesh.position.z -= speed * delta;
     }
-    if (checkKeyDown("q")) {
-      SCENE.meshes[0].mesh.position.y += speed / 2.0;
+    if (checkKey("q")) {
+      SCENE.meshes[0].mesh.position.y += speed * delta;
     }
-    if (checkKeyUp("e")) {
-      SCENE.meshes[0].mesh.position.y -= speed / 2.0;
+    if (checkKey("e")) {
+      SCENE.meshes[0].mesh.position.y -= speed * delta;
     }
   },
 ]);

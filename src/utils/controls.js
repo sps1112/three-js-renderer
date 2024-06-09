@@ -110,6 +110,7 @@ function updateKeys() {
   mouse.lUp = false;
   mouse.mUp = false;
   mouse.rUp = false;
+  mouse.diff = { x: 0.0, y: 0.0 };
 }
 
 function checkKey(key) {

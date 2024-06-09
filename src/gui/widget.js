@@ -3,11 +3,12 @@
 //! Widget Dependencies
 //-----------------------------------------------
 import { gui } from "./gui";
-import { lights, meshes } from "../scene/scene";
+import { env, lights, meshes, updateEnvironment } from "../scene/scene";
 import { LIGHT_TYPES } from "../scene/light";
 import { lightHelpers } from "../utils/helpers";
 import { MATERIAL_TYPES } from "../rendering/material";
 import { camera } from "../rendering/renderer";
+import { world } from "../physics/physics";
 //-----------------------------------------------
 
 //! Widget Variables
@@ -409,6 +410,14 @@ function setupObjectsGUI() {
 
 function setSceneGUI() {
   sceneGUI = gui.addFolder("Scene");
+  sceneGUI
+    .add(env, "render")
+    .name("Render Background")
+    .onChange(() => updateEnvironment());
+  sceneGUI
+    .add(env, "light")
+    .name("Light with Background")
+    .onChange(() => updateEnvironment());
 
   var cameraGUI = sceneGUI.addFolder("Camera");
   sceneControllers.push(
@@ -428,6 +437,15 @@ function setSceneGUI() {
       .step(0.001)
   );
   sceneFolder.push(cameraGUI);
+
+  var physicsGUI = sceneGUI.addFolder("Physics");
+  physicsGUI
+    .add(world.gravity, "y")
+    .name("Gravity")
+    .min(-10.0)
+    .max(10.0)
+    .step(0.01);
+  sceneFolder.push(sceneGUI);
 }
 
 function updateSceneGUI() {

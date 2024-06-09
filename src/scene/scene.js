@@ -9,6 +9,7 @@ import { rgbeLoader } from "../utils/loader";
 //! Scene Variables
 //-----------------------------------------------
 var scene;
+var env;
 var group;
 var meshes;
 var lights;
@@ -19,6 +20,12 @@ var lights;
 function setupScene() {
   scene = new THREE.Scene();
 
+  env = {
+    map: null,
+    render: false,
+    light: false,
+  };
+
   group = new THREE.Group();
   group.position.y = 0.0;
   scene.add(group);
@@ -27,12 +34,25 @@ function setupScene() {
   meshes = [];
 }
 
-function setEnvironment() {
-  rgbeLoader.load("textures/environmentMap/2k.hdr", (environmentMap) => {
+function loadEnvironment(path) {
+  rgbeLoader.load(path, (environmentMap) => {
     environmentMap.mapping = THREE.EquirectangularReflectionMapping;
-    // scene.background = environmentMap;
-    // scene.environment = environmentMap;
+    env.map = environmentMap;
   });
+}
+
+function updateEnvironment() {
+  if (env.render) {
+    scene.background = env.map;
+  } else {
+    scene.background = null;
+  }
+
+  if (env.light) {
+    scene.environment = env.map;
+  } else {
+    scene.environment = null;
+  }
 }
 
 function addToScene(object) {
@@ -52,9 +72,11 @@ function addLight(light) {
 
 export {
   scene,
+  env,
   group,
   setupScene,
-  setEnvironment,
+  loadEnvironment,
+  updateEnvironment,
   addToScene,
   meshes,
   addMesh,

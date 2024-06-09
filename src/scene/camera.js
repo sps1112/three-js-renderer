@@ -80,6 +80,7 @@ class PerspectiveCam extends Camera {
     this.cam = new THREE.PerspectiveCamera(fov, aspect, near, far);
     this.cam.position.set(0, 0, distance);
   }
+
   update(aspect) {
     this.cam.aspect = aspect;
     this.cam.updateProjectionMatrix();

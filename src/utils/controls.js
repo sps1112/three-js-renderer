@@ -2,12 +2,10 @@
 //---------------------------------------------------------------
 //! Controls Dependencies
 //-----------------------------------------------
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
 //-----------------------------------------------
 
 //! Controls Variables
 //-----------------------------------------------
-var controls;
 var keys = {};
 var mouse = {
   left: false,
@@ -30,7 +28,7 @@ var canvasSize;
 
 //! Controls Functions
 //-----------------------------------------------
-function startInput() {
+function startControls() {
   window.addEventListener("keydown", (event) => {
     setKey(event.key, true);
   });
@@ -41,19 +39,9 @@ function startInput() {
   document.addEventListener("wheel", onMouseScroll, false);
 }
 
-function setupOrbitalControls(camera, canvas, lookAt) {
-  controls = new OrbitControls(camera, canvas);
-  // controls.enabled = false;
-  controls.enableDamping = true;
-  // controls.enablePan = false;
-  controls.target.y = lookAt.position.y;
-  updateControls();
-}
-
 function updateControls(size) {
   canvasSize = size;
   updateKeys();
-  // controls.update();
 }
 
 function setKey(key, status) {
@@ -134,13 +122,6 @@ function checkKeyUp(key) {
   return false;
 }
 
-function logMouse() {
-  // console.log(mouse.left + " " + mouse.middle + " " + mouse.right);
-  console.log(mouse.cursor.x + " " + mouse.cursor.y);
-  // console.log(mouse.scroll);
-  // console.log(mouse.rDown + " " + mouse.right + " " + mouse.rUp);
-}
-
 function onMouseDown(event) {
   document.addEventListener("mouseup", onMouseUp, false);
   switch (event.button) {
@@ -159,6 +140,7 @@ function onMouseDown(event) {
     default:
       break;
   }
+
   if (mouse.left || mouse.right) {
     if (!mouse.moving) {
       document.addEventListener("mousemove", onMouseMove, false);
@@ -175,12 +157,11 @@ function onMouseDown(event) {
 }
 
 function onMouseMove(event) {
-  // console.log("valid move");
-
   var newCursor = {
     x: 2.0 * (event.clientX / canvasSize.width - 0.5),
     y: 2.0 * ((canvasSize.height - event.clientY) / canvasSize.height - 0.5),
   };
+
   mouse.diff.x = mouseSensitivity * 100 * (newCursor.x - mouse.cursor.x);
   mouse.diff.y = mouseSensitivity * 100 * (newCursor.y - mouse.cursor.y);
   mouse.cursor.x = newCursor.x;
@@ -204,6 +185,7 @@ function onMouseUp(event) {
     default:
       break;
   }
+
   if (!mouse.left && !mouse.right) {
     mouse.moving = false;
     document.removeEventListener("mousemove", onMouseMove, false);
@@ -211,6 +193,7 @@ function onMouseUp(event) {
       x: 0.0,
       y: 0.0,
     };
+
     if (!mouse.middle) {
       document.removeEventListener("mouseup", onMouseUp, false);
     }
@@ -225,16 +208,12 @@ function checkMouseButton(button) {
   switch (button) {
     case 0:
       return mouse.left;
-      break;
     case 1:
       return mouse.middle;
-      break;
     case 2:
       return mouse.right;
-      break;
     default:
       return false;
-      break;
   }
 }
 
@@ -242,16 +221,12 @@ function checkMouseButtonDown(button) {
   switch (button) {
     case 0:
       return mouse.lDown;
-      break;
     case 1:
       return mouse.mDown;
-      break;
     case 2:
       return mouse.rDown;
-      break;
     default:
       return false;
-      break;
   }
 }
 
@@ -259,16 +234,12 @@ function checkMouseButtonUp(button) {
   switch (button) {
     case 0:
       return mouse.lUp;
-      break;
     case 1:
       return mouse.mUp;
-      break;
     case 2:
       return mouse.rUp;
-      break;
     default:
       return false;
-      break;
   }
 }
 
@@ -280,14 +251,13 @@ function checkMouseScroll() {
   return mouse.scroll;
 }
 //-----------------------------------------------
+
 export {
-  setupOrbitalControls,
-  startInput,
+  startControls,
   updateControls,
   checkKey,
   checkKeyDown,
   checkKeyUp,
-  logMouse,
   checkMouseButton,
   checkMouseButtonDown,
   checkMouseButtonUp,

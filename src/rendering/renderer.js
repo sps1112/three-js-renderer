@@ -3,19 +3,9 @@
 //! Renderer Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
-import { scene, group, meshes } from "../scene/scene";
+import { scene } from "../scene/scene";
 import { PerspectiveCam, OrthographicCam } from "../scene/camera";
-import {
-  checkKey,
-  checkKeyDown,
-  checkMouseButton,
-  checkMouseButtonDown,
-  checkMouseButtonUp,
-  logMouse,
-  setupOrbitalControls,
-  startInput,
-  updateControls,
-} from "../utils/controls";
+import { checkKeyDown, startControls, updateControls } from "../utils/controls";
 import { updateGUI } from "../gui/gui";
 import { updateSceneGUI } from "../gui/widget";
 import { setSceneGUI, setupLightGUI, setupObjectsGUI } from "../gui/widget";
@@ -104,39 +94,38 @@ function updateFullScreen() {
   }
 }
 
-function startRenderLoop(list) {
+function updateFocus(target) {
+  camera.setTarget(target);
+}
+
+function startRenderLoop(list, target) {
   timer = new Timer();
   callbacks = list;
-  // setupOrbitalControls(camera.cam, canvas, group);
-  camera.setProperties(8.0, Math.PI / 3.0, Math.PI / 6.0, 0.1, 0.5);
-  camera.setTarget(meshes[0]);
 
-  // Setup GUI for scene
+  // Set Camera to target of choice
+  camera.setProperties(8.0, Math.PI / 3.0, Math.PI / 6.0, 0.1, 0.5);
+  updateFocus(target);
+
+  // Setup GUI for the scene
   setSceneGUI();
   setupObjectsGUI();
   setupLightGUI();
 
-  startInput();
+  // Start rendering
+  startControls();
   renderLoop();
 }
 
 function renderLoop() {
   // Time Calculations
   timer.update();
-  //   console.log("Framerate: " + 1.0 / deltaTime);
 
-  // Execute callbacks (like object calculations)
+  // Execute callbacks (like object calculations or physics update)
   callbacks.forEach((callback) => callback(timer.deltaTime));
 
-  // Check Input
+  // Check for Input
   if (checkKeyDown("f")) {
     updateFullScreen();
-  }
-  if (checkKeyDown("z")) {
-    camera.setTarget(meshes[1]);
-  }
-  if (checkKeyDown("x")) {
-    camera.setTarget(meshes[0]);
   }
 
   // Render the scene
@@ -160,5 +149,6 @@ export {
   setCamera,
   camera,
   startRenderLoop,
+  updateFocus,
 };
 //---------------------------------------------------------------

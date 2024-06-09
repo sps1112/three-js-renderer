@@ -13,6 +13,8 @@ class Mesh {
     this.geometry.setMesh(this);
     this.material = material;
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material.mat);
+
+    // Set default transform
     this.position = position;
     this.rotation = rotation;
     this.scale = scale;
@@ -26,8 +28,8 @@ class Mesh {
     this.updateGUI();
   }
 
+  // update transform with default data
   resetTransform() {
-    // update transform with default data
     this.updatePosition(this.position);
     this.updateRotation(this.rotation);
     this.updateScale(this.scale);
@@ -50,10 +52,10 @@ class Mesh {
 
   updateQuaternion(quaternion) {
     this.mesh.quaternion.set(
-      quaternion[0],
-      quaternion[1],
-      quaternion[2],
-      quaternion[3]
+      quaternion.x,
+      quaternion.y,
+      quaternion.z,
+      quaternion.w
     );
     this.updateGUI();
   }

@@ -17,8 +17,8 @@ var RIGIDBODY_TYPES = {
 class Rigidbody {
   constructor(type, mesh) {
     this.type = type;
-    this.meshes = [];
-    this.meshes.push(mesh); // Mesh class to sync
+    this.mesh = mesh; // Mesh class for this rigidbody
+    this.colliders = [];
 
     switch (this.type) {
       case RIGIDBODY_TYPES.STATIC:
@@ -35,52 +35,61 @@ class Rigidbody {
     }
     this.data
       .setTranslation(
-        this.meshes[0].mesh.position.x,
-        this.meshes[0].mesh.position.y,
-        this.meshes[0].mesh.position.z
+        this.mesh.mesh.position.x,
+        this.mesh.mesh.position.y,
+        this.mesh.mesh.position.z
       )
-      .setRotation(this.meshes[0].mesh.quaternion);
+      .setRotation(this.mesh.mesh.quaternion);
   }
 
-  setProperties(gravity, linearVel, angularVel) {
-    this.gravity = gravity;
-    this.linearVel = linearVel;
-    this.angularVel = angularVel;
+  setup(props) {
+    this.gravity = props.gravity;
+    this.linearVel = props.linearVel;
+    this.angularVel = props.angularVel;
 
     this.data
       .setGravityScale(this.gravity)
       .setLinvel(this.linearVel.x, this.linearVel.y, this.linearVel.z)
       .setAngvel(this.angularVel);
+    this.rigidbody = world.createRigidBody(this.data);
   }
 
-  initBody(colliderType, renderCollider) {
-    this.rigidbody = world.createRigidBody(this.data);
-    this.collider = new Collider3D(
+  attachCollider(colliderType, shapeProps, renderCollider) {
+    // Create Collider object (not initialized)
+    var collider = new Collider3D(
       colliderType,
-      this.meshes[0].mesh.scale,
-      {
-        x: 0.0,
-        y: 0.0,
-        z: 0.0,
-      },
+      shapeProps,
       this.rigidbody,
       renderCollider
     );
-    if (renderCollider) {
-      this.collider.renderCollider(this.meshes[0]);
-      this.meshes.push(this.collider.mesh);
+    this.colliders.push(collider);
+  }
+
+  setupCollider(index, props, renderProps) {
+    // Setup collider with the properties
+    this.colliders[index].setup(props);
+
+    // Render collider
+    if (this.colliders[index].render) {
+      this.colliders[index].renderCollider(renderProps);
     }
   }
 
   refreshMesh() {
-    this.meshes.forEach((mesh) => {
-      mesh.updatePosition([
-        this.collider.collider.translation().x,
-        this.collider.collider.translation().y,
-        this.collider.collider.translation().z,
-      ]);
+    // Refresh mesh position
+    this.mesh.updatePosition([
+      this.colliders[0].collider.translation().x,
+      this.colliders[0].collider.translation().y,
+      this.colliders[0].collider.translation().z,
+    ]);
 
-      mesh.updateQuaternion(this.collider.collider.rotation());
+    this.mesh.updateQuaternion(this.colliders[0].collider.rotation());
+
+    // Refresh all colliders which are being rendererd
+    this.colliders.forEach((collider) => {
+      if (collider.render) {
+        collider.refreshMesh();
+      }
     });
   }
 }

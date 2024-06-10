@@ -20,7 +20,7 @@ function setupGUI() {
     width: canvasSize.width / 4.0,
     closeFolders: true,
   });
-  // gui.close();
+  gui.close();
   // gui.hide();
 }
 

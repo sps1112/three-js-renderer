@@ -3,6 +3,8 @@
 //! Mesh Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
+import * as GEOMETRY from "../rendering/geometry";
+import * as MATERIAL from "../rendering/material";
 //-----------------------------------------------
 
 //! Mesh Variables
@@ -25,6 +27,7 @@ class Mesh {
   update() {
     this.mesh.geometry = this.geometry.geometry;
     this.mesh.material = this.material.mat;
+    this.mesh.material.needsUpdate = true;
     this.updateGUI();
   }
 
@@ -68,6 +71,15 @@ class Mesh {
     if (this.gui != null) {
       this.gui.forEach((ui) => ui.updateDisplay());
     }
+  }
+
+  setFromModel(modelData) {
+    var modelMesh = modelData.children[0];
+    this.geometry.setGeometry(modelMesh.geometry);
+    this.material.setTexture(modelMesh.material.map);
+    this.material.mat.roughness = 0.3;
+    this.material.mat.metalness = 0.5;
+    this.update();
   }
 }
 //-----------------------------------------------

@@ -18,6 +18,7 @@ var GEOMETRY_TYPES = {
   CYLINDER: 6,
   CONE: 7,
   TEXT: 8,
+  MODEL: 9,
 };
 
 class Geometry {
@@ -117,6 +118,10 @@ class Geometry {
     }
   }
 
+  setGeometry(geo) {
+    this.geometry = geo;
+  }
+
   setMesh(mesh) {
     this.mesh = mesh;
   }
@@ -160,11 +165,28 @@ class GeometryText extends Geometry {
     this.callback();
   }
 }
+
+class GeometryModel extends Geometry {
+  constructor(model) {
+    super(GEOMETRY_TYPES.MODEL, 1);
+
+    this.callback = (data) => {
+      this.mesh.setFromModel(data);
+    };
+
+    if (model.loaded) {
+      var modelMesh = model.model.children[0];
+      this.geometry = modelMesh.geometry;
+    } else {
+      model.setCallback(this.callback);
+    }
+  }
+}
 //-----------------------------------------------
 
 //! Geometry Functions
 //-----------------------------------------------
 //-----------------------------------------------
 
-export { GEOMETRY_TYPES, Geometry, GeometryText };
+export { GEOMETRY_TYPES, Geometry, GeometryText, GeometryModel };
 //---------------------------------------------------------------

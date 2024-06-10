@@ -69,7 +69,7 @@ class Camera {
 
   updateDistance(diff) {
     this.distance += diff;
-    this.distance = clamp(this.distance, 0.1, 30.0);
+    this.distance = clamp(this.distance, 0.1, 100.0);
   }
 }
 
@@ -114,10 +114,10 @@ class OrthographicCam extends Camera {
 
   updateDistance(diff) {
     this.distance += diff;
-    this.distance = clamp(this.distance, 0.1, 30.0);
+    this.distance = clamp(this.distance, 0.1, 100.0);
 
     this.size += diff;
-    this.size = clamp(this.size, 0.1, 30.0);
+    this.size = clamp(this.size, 0.1, 100.0);
 
     this.update(this.aspect);
   }

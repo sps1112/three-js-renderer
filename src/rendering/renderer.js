@@ -6,7 +6,7 @@ import * as THREE from "three";
 import { scene } from "../scene/scene";
 import { PerspectiveCam, OrthographicCam } from "../scene/camera";
 import { checkKeyDown, startControls, updateControls } from "../utils/controls";
-import { updateGUI } from "../gui/gui";
+import { gui, updateGUI } from "../gui/gui";
 import { updateSceneGUI } from "../gui/widget";
 import { setSceneGUI, setupLightGUI, setupObjectsGUI } from "../gui/widget";
 //-----------------------------------------------
@@ -61,9 +61,9 @@ function setCamera() {
   const orthoSize = 6.0;
   camera = new PerspectiveCam(60, aspectRatio, 0.1, 1000, 6);
   // camera = new OrthographicCam(orthoSize, aspectRatio, 0.1, 1000, 5);
-  camera.cam.position.x = 5.0;
-  camera.cam.position.y = 5.0;
-  scene.add(camera.cam);
+  camera.cam.position.x = 0.0;
+  camera.cam.position.y = 20.0;
+  camera.cam.position.z = 20.0;
 }
 
 function resizeRenderer() {
@@ -103,14 +103,16 @@ function startRenderLoop(list, target) {
   callbacks = list;
 
   // Set Camera to target of choice
-  camera.setProperties(8.0, Math.PI / 3.0, Math.PI / 6.0, 0.1, 0.5);
+  scene.add(camera.cam);
+  camera.setProperties(35.0, Math.PI * 0.27, 0, 0.1, 2);
   updateFocus(target);
 
   // Setup GUI for the scene
-  setSceneGUI();
-  setupObjectsGUI();
-  setupLightGUI();
-
+  if (gui) {
+    setSceneGUI();
+    setupObjectsGUI();
+    setupLightGUI();
+  }
   // Start rendering
   startControls();
   renderLoop();

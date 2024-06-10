@@ -9,6 +9,7 @@ import { lightHelpers } from "../utils/helpers";
 import { MATERIAL_TYPES } from "../rendering/material";
 import { camera } from "../rendering/renderer";
 import { world } from "../physics/physics";
+import { wakeWorld } from "../physics/simulation";
 //-----------------------------------------------
 
 //! Widget Variables
@@ -438,14 +439,19 @@ function setSceneGUI() {
   );
   sceneFolder.push(cameraGUI);
 
-  var physicsGUI = sceneGUI.addFolder("Physics");
-  physicsGUI
-    .add(world.gravity, "y")
-    .name("Gravity")
-    .min(-10.0)
-    .max(10.0)
-    .step(0.01);
-  sceneFolder.push(sceneGUI);
+  if (world) {
+    var physicsGUI = sceneGUI.addFolder("Physics");
+    physicsGUI
+      .add(world.gravity, "y")
+      .name("Gravity")
+      .min(-10.0)
+      .max(10.0)
+      .step(0.01)
+      .onChange((value) => {
+        wakeWorld();
+      });
+  }
+  sceneFolder.push(physicsGUI);
 }
 
 function updateSceneGUI() {

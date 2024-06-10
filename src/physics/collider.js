@@ -24,17 +24,17 @@ var COLLIDER_TYPES = {
 };
 
 class Collider3D {
-  constructor(type, scale, offset, rigidbody, render) {
+  constructor(type, shapeProps, rigidbody, render) {
     this.type = type;
-    this.scale = scale;
-    this.offset = offset;
+    this.shapeProps = shapeProps;
     this.rigidbody = rigidbody;
     this.render = render;
-    this.setup();
-    // Density, Friction, Restitution
   }
 
-  setup() {
+  setup(props) {
+    this.restitution = props.restitution;
+    this.scale = this.shapeProps.scale;
+
     switch (this.type) {
       case COLLIDER_TYPES.BOX:
         this.shape = RAPIER.ColliderDesc.cuboid(
@@ -81,7 +81,17 @@ class Collider3D {
       default:
         break;
     }
-    this.shape.setTranslation(this.offset.x, this.offset.y, this.offset.z);
+
+    // Set the shape with the properties
+    this.shape
+      .setTranslation(
+        this.shapeProps.offset.x,
+        this.shapeProps.offset.y,
+        this.shapeProps.offset.z
+      )
+      .setRestitution(this.restitution * 2.0);
+
+    // Create the collider and add to the world
     if (this.rigidbody == null) {
       this.collider = world.createCollider(this.shape);
     } else {
@@ -89,9 +99,10 @@ class Collider3D {
     }
   }
 
-  renderCollider(mesh) {
-    var targetPos = mesh.mesh.position;
-    var targetRot = mesh.mesh.rotation;
+  renderCollider(renderProps) {
+    var targetPos = renderProps.position;
+    var targetRot = renderProps.rotation;
+    var subdivisions = renderProps.subdivisions;
     switch (this.type) {
       case COLLIDER_TYPES.BOX:
         this.mesh = new Mesh(
@@ -115,7 +126,7 @@ class Collider3D {
 
       case COLLIDER_TYPES.SPHERE:
         this.mesh = new Mesh(
-          new Geometry(GEOMETRY_TYPES.SPHERE, mesh.geometry.subdivisions),
+          new Geometry(GEOMETRY_TYPES.SPHERE, subdivisions),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
           [targetPos.x, targetPos.y, targetPos.z],
           [targetRot.x, targetRot.y, targetRot.z],
@@ -125,7 +136,7 @@ class Collider3D {
 
       case COLLIDER_TYPES.TORUS:
         this.mesh = new Mesh(
-          new Geometry(GEOMETRY_TYPES.CYLINDER, mesh.geometry.subdivisions),
+          new Geometry(GEOMETRY_TYPES.CYLINDER, subdivisions),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
           [targetPos.x, targetPos.y, targetPos.z],
           [targetRot.x, targetRot.y, targetRot.z],
@@ -134,15 +145,12 @@ class Collider3D {
         break;
 
       case COLLIDER_TYPES.CAPSULE:
-        var geo = new Geometry(
-          GEOMETRY_TYPES.CAPSULE,
-          mesh.geometry.subdivisions
-        );
+        var geo = new Geometry(GEOMETRY_TYPES.CAPSULE, subdivisions);
         geo.geometry = new CapsuleGeometry(
           0.5,
           1 * this.scale.y,
-          mesh.subdivisions,
-          mesh.subdivisions
+          subdivisions,
+          subdivisions
         );
         this.mesh = new Mesh(
           geo,
@@ -155,7 +163,7 @@ class Collider3D {
 
       case COLLIDER_TYPES.CYLINDER:
         this.mesh = new Mesh(
-          new Geometry(GEOMETRY_TYPES.CYLINDER, mesh.geometry.subdivisions),
+          new Geometry(GEOMETRY_TYPES.CYLINDER, subdivisions),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
           [targetPos.x, targetPos.y, targetPos.z],
           [targetRot.x, targetRot.y, targetRot.z],
@@ -165,7 +173,7 @@ class Collider3D {
 
       case COLLIDER_TYPES.CONE:
         this.mesh = new Mesh(
-          new Geometry(GEOMETRY_TYPES.CONE, mesh.geometry.subdivisions),
+          new Geometry(GEOMETRY_TYPES.CONE, subdivisions),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
           [targetPos.x, targetPos.y, targetPos.z],
           [targetRot.x, targetRot.y, targetRot.z],
@@ -177,6 +185,16 @@ class Collider3D {
         break;
     }
     addMesh(this.mesh);
+  }
+
+  refreshMesh() {
+    this.mesh.updatePosition([
+      this.collider.translation().x,
+      this.collider.translation().y,
+      this.collider.translation().z,
+    ]);
+
+    this.mesh.updateQuaternion(this.collider.rotation());
   }
 }
 //-----------------------------------------------

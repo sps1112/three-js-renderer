@@ -38,6 +38,9 @@ function loadEnvironment(path) {
   rgbeLoader.load(path, (environmentMap) => {
     environmentMap.mapping = THREE.EquirectangularReflectionMapping;
     env.map = environmentMap;
+    env.render = true;
+    env.light = true;
+    updateEnvironment();
   });
 }
 

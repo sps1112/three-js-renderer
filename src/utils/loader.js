@@ -5,6 +5,7 @@
 import * as THREE from "three";
 import { RGBELoader } from "three/examples/jsm/loaders/RGBELoader.js";
 import { FontLoader } from "three/examples/jsm/loaders/FontLoader.js";
+import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 //-----------------------------------------------
 
 //! Loader Variables
@@ -13,6 +14,7 @@ var loadingManager;
 var textureLoader;
 var rgbeLoader;
 var fontLoader;
+var gltfLoader;
 //-----------------------------------------------
 
 //! Loader Functions
@@ -35,8 +37,9 @@ function setupLoaders() {
   textureLoader = new THREE.TextureLoader(loadingManager);
   rgbeLoader = new RGBELoader(loadingManager);
   fontLoader = new FontLoader(loadingManager);
+  gltfLoader = new GLTFLoader(loadingManager);
 }
 //-----------------------------------------------
 
-export { setupLoaders, textureLoader, rgbeLoader, fontLoader };
+export { setupLoaders, textureLoader, rgbeLoader, fontLoader, gltfLoader };
 //---------------------------------------------------------------

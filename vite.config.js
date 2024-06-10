@@ -1,4 +1,5 @@
 import wasm from "vite-plugin-wasm";
+import topLevelAwait from "vite-plugin-top-level-await";
 
 export default {
   root: "./", // Sources files (typically where index.html is)
@@ -12,5 +13,5 @@ export default {
     emptyOutDir: true, // Empty the folder first
     sourcemap: true, // Add sourcemap
   },
-  plugins: [wasm()],
+  plugins: [wasm(), topLevelAwait()],
 };

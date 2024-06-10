@@ -81,54 +81,56 @@ GUI.setupGUI();
 
 // Setup Physics:-
 //-----------------------------------------------
-SIM.setupSimulation(60);
-var generated = false;
-var body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, SCENE.meshes[2]); // Beyblade
-body1.setup({
-  gravity: 1.0,
-  linearVel: {
-    x: 0.0,
-    y: 0.0,
-    z: 0.0,
-  },
-  angularVel: {
-    x: 0.0,
-    y: 2.0 * Math.PI * 16.0, // Rotations per second
-    z: 0.0,
-  },
-  linearDamp: 0.05,
-  angularDamp: 0.03,
-  center: { x: 0, y: 0.3, z: 0 },
-});
 
-var body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, SCENE.meshes[1]); // Stadium
-body2.setup({
-  gravity: 1.0,
-  linearVel: {
-    x: 0.0,
-    y: 0.0,
-    z: 0.0,
-  },
-  angularVel: {
-    x: 0.0,
-    y: 2.0 * Math.PI * 0.0, // Rotations per second
-    z: 0.0,
-  },
-  linearDamp: 0.0,
-  angularDamp: 0.0,
-  center: { x: 0, y: 0, z: 0 },
-});
+var generated = false;
 
 //-----------------------------------------------
 
 RENDERER.startRenderLoop(
   // All the callbacks we will send the renderer to execute
   [
-    SIM.updateWorld,
     () => {
       if (CONTROLS.checkKeyDown("p") && !generated) {
         console.log("Start Physics");
         generated = true;
+
+        SIM.setupSimulation(60);
+        var body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, SCENE.meshes[2]); // Beyblade
+        body1.setup({
+          gravity: 1.0,
+          linearVel: {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+          },
+          angularVel: {
+            x: 0.0,
+            y: 2.0 * Math.PI * 16.0, // Rotations per second
+            z: 0.0,
+          },
+          linearDamp: 0.05,
+          angularDamp: 0.03,
+          center: { x: 0, y: 0.3, z: 0 },
+        });
+
+        var body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, SCENE.meshes[1]); // Stadium
+        body2.setup({
+          gravity: 1.0,
+          linearVel: {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+          },
+          angularVel: {
+            x: 0.0,
+            y: 2.0 * Math.PI * 0.0, // Rotations per second
+            z: 0.0,
+          },
+          linearDamp: 0.0,
+          angularDamp: 0.0,
+          center: { x: 0, y: 0, z: 0 },
+        });
+
         body1.attachCollider(
           COLLIDER_TYPES.CONVEX,
           {
@@ -180,6 +182,7 @@ RENDERER.startRenderLoop(
         SIM.addRigidbody(body2);
       }
     },
+    SIM.updateWorld,
   ],
   SCENE.meshes[2] // start target for the camera
 );

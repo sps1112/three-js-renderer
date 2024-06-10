@@ -23,6 +23,7 @@ var MATERIAL_TYPES = {
   LIT_TEXTURE: 11,
   TEXT: 12,
   PHYSIC: 13,
+  COLLIDER: 14,
 };
 
 class Material {
@@ -125,9 +126,19 @@ class Material {
         this.mat.clearcoat = 0.5;
         break;
 
+      case MATERIAL_TYPES.COLLIDER:
+        this.mat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        this.mat.wireframe = true;
+        this.mat.transparent = true;
+        this.mat.opacity = 0.5;
+
       default:
         break;
     }
+  }
+
+  setTexture(map) {
+    this.mat.map = map;
   }
 }
 //-----------------------------------------------

@@ -3,9 +3,12 @@
 //! Renderer Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
-import { scene, group } from "../scene/scene";
+import { scene } from "../scene/scene";
 import { PerspectiveCam, OrthographicCam } from "../scene/camera";
-import { setupOrbitalControls, updateControls } from "../utils/controls";
+import { checkKeyDown, startControls, updateControls } from "../utils/controls";
+import { gui, updateGUI } from "../gui/gui";
+import { updateSceneGUI } from "../gui/widget";
+import { setSceneGUI, setupLightGUI, setupObjectsGUI } from "../gui/widget";
 //-----------------------------------------------
 
 //! Renderer Variables
@@ -51,7 +54,6 @@ function setupRenderer() {
   renderer.setPixelRatio(Math.min(2, window.devicePixelRatio));
 
   window.addEventListener("resize", resizeRenderer);
-  window.addEventListener("dblclick", processDoubleClick);
 }
 
 function setCamera() {
@@ -59,7 +61,9 @@ function setCamera() {
   const orthoSize = 6.0;
   camera = new PerspectiveCam(60, aspectRatio, 0.1, 1000, 6);
   // camera = new OrthographicCam(orthoSize, aspectRatio, 0.1, 1000, 5);
-  scene.add(camera.cam);
+  camera.cam.position.x = 0.0;
+  camera.cam.position.y = 20.0;
+  camera.cam.position.z = 20.0;
 }
 
 function resizeRenderer() {
@@ -72,7 +76,7 @@ function resizeRenderer() {
   camera.update(canvasSize.width / canvasSize.height);
 }
 
-function processDoubleClick() {
+function updateFullScreen() {
   const fullscreenElement =
     document.fullscreenElement || document.webkitFullscreenElement;
   if (!fullscreenElement) {
@@ -90,28 +94,50 @@ function processDoubleClick() {
   }
 }
 
-function startRenderLoop(list) {
+function updateFocus(target) {
+  camera.setTarget(target);
+}
+
+function startRenderLoop(list, target) {
   timer = new Timer();
   callbacks = list;
-  setupOrbitalControls(camera.cam, canvas, group);
+
+  // Set Camera to target of choice
+  scene.add(camera.cam);
+  camera.setProperties(35.0, Math.PI * 0.35, 0, 0.1, 2);
+  updateFocus(target);
+
+  // Setup GUI for the scene
+  if (gui) {
+    setSceneGUI();
+    setupObjectsGUI();
+    setupLightGUI();
+  }
+  // Start rendering
+  startControls();
   renderLoop();
 }
 
 function renderLoop() {
   // Time Calculations
   timer.update();
-  //   console.log("Framerate: " + 1.0 / deltaTime);
 
-  // Execute callbacks (like object calculations)
-  callbacks.forEach((callback) => callback());
+  // Execute callbacks (like object calculations or physics update)
+  callbacks.forEach((callback) => callback(timer.deltaTime));
 
-  // Update controls
-  updateControls();
+  // Check for Input
+  if (checkKeyDown("f")) {
+    updateFullScreen();
+  }
 
   // Render the scene
+  camera.updateLookAt(timer.deltaTime);
   renderer.render(scene, camera.cam);
 
-  // Setup callback
+  // End frame
+  updateGUI();
+  updateSceneGUI();
+  updateControls(canvasSize);
   window.requestAnimationFrame(renderLoop);
 }
 //-----------------------------------------------
@@ -125,5 +151,6 @@ export {
   setCamera,
   camera,
   startRenderLoop,
+  updateFocus,
 };
 //---------------------------------------------------------------

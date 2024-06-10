@@ -13,29 +13,71 @@ class Mesh {
     this.geometry.setMesh(this);
     this.material = material;
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material.mat);
+
+    // Set default transform
     this.position = position;
     this.rotation = rotation;
     this.scale = scale;
+    this.gui = null;
     this.resetTransform();
   }
 
   update() {
     this.mesh.geometry = this.geometry.geometry;
     this.mesh.material = this.material.mat;
+    this.mesh.material.needsUpdate = true;
+    this.updateGUI();
   }
 
+  // update transform with default data
   resetTransform() {
-    this.mesh.position.set(
-      this.position[0],
-      this.position[1],
-      this.position[2]
+    this.updatePosition(this.position);
+    this.updateRotation(this.rotation);
+    this.updateScale(this.scale);
+  }
+
+  updatePosition(position) {
+    this.mesh.position.set(position.x, position.y, position.z);
+    this.updateGUI();
+  }
+
+  updateRotation(rotation) {
+    this.mesh.rotation.set(rotation.x, rotation.y, rotation.z);
+    this.updateGUI();
+  }
+
+  updateScale(scale) {
+    this.mesh.scale.set(scale.x, scale.y, scale.z);
+    this.updateGUI();
+  }
+
+  updateQuaternion(quaternion) {
+    this.mesh.quaternion.set(
+      quaternion.x,
+      quaternion.y,
+      quaternion.z,
+      quaternion.w
     );
-    this.mesh.rotation.set(
-      this.rotation[0],
-      this.rotation[1],
-      this.rotation[2]
-    );
-    this.mesh.scale.set(this.scale[0], this.scale[1], this.scale[2]);
+    this.updateGUI();
+  }
+
+  setGUI(gui) {
+    this.gui = gui;
+  }
+
+  updateGUI() {
+    if (this.gui != null) {
+      this.gui.forEach((ui) => ui.updateDisplay());
+    }
+  }
+
+  setFromModel(modelData) {
+    var modelMesh = modelData.children[0];
+    this.geometry.setGeometry(modelMesh.geometry);
+    this.material.setTexture(modelMesh.material.map);
+    this.material.mat.roughness = 0.3;
+    this.material.mat.metalness = 0.5;
+    this.update();
   }
 }
 //-----------------------------------------------

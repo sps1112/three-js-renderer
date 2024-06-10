@@ -4,6 +4,7 @@
 //-----------------------------------------------
 import GUI from "lil-gui";
 import { canvasSize } from "../rendering/renderer";
+import { checkKeyDown } from "../utils/controls";
 //-----------------------------------------------
 
 //! Gui Variables
@@ -19,15 +20,16 @@ function setupGUI() {
     width: canvasSize.width / 4.0,
     closeFolders: true,
   });
-  // gui.close();
+  gui.close();
   // gui.hide();
-  window.addEventListener("keydown", (event) => {
-    if (event.key == "h") {
-      gui.show(gui._hidden);
-    }
-  });
+}
+
+function updateGUI() {
+  if (checkKeyDown("h")) {
+    gui.show(gui._hidden);
+  }
 }
 //-----------------------------------------------
 
-export { gui, setupGUI };
+export { gui, setupGUI, updateGUI };
 //---------------------------------------------------------------

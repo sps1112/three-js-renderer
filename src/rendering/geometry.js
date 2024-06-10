@@ -14,7 +14,12 @@ var GEOMETRY_TYPES = {
   CUBE: 2,
   SPHERE: 3,
   TORUS: 4,
-  TEXT: 5,
+  CAPSULE: 5,
+  CYLINDER: 6,
+  CONE: 7,
+  TEXT: 8,
+  MODEL: 9,
+  BUFFER: 11,
 };
 
 class Geometry {
@@ -44,11 +49,12 @@ class Geometry {
 
       case GEOMETRY_TYPES.PLANE:
         this.geometry = new THREE.PlaneGeometry(
-          1,
-          1,
+          5.0,
+          5.0,
           this.subdivisions,
           this.subdivisions
         );
+        this.geometry.rotateX(-Math.PI / 2.0);
         break;
 
       case GEOMETRY_TYPES.CUBE:
@@ -72,16 +78,58 @@ class Geometry {
 
       case GEOMETRY_TYPES.TORUS:
         this.geometry = new THREE.TorusGeometry(
-          0.8,
-          0.2,
+          1.0,
+          0.33,
           6 * this.subdivisions,
           6 * this.subdivisions
+        );
+        this.geometry.rotateX(Math.PI / 2.0);
+        break;
+
+      case GEOMETRY_TYPES.CAPSULE:
+        this.geometry = new THREE.CapsuleGeometry(
+          0.5,
+          1.0,
+          4 * this.subdivisions,
+          4 * this.subdivisions
+        );
+        break;
+
+      case GEOMETRY_TYPES.CYLINDER:
+        this.geometry = new THREE.CylinderGeometry(
+          1.0,
+          1.0,
+          2.0,
+          this.subdivisions * 9.0,
+          this.subdivisions
+        );
+        break;
+
+      case GEOMETRY_TYPES.CONE:
+        this.geometry = new THREE.ConeGeometry(
+          1.0,
+          2.0,
+          this.subdivisions * 6,
+          this.subdivisions
         );
         break;
 
       default:
         break;
     }
+  }
+
+  setupBuffer(vertices, indices) {
+    const posAttribute = new THREE.BufferAttribute(vertices, 3);
+    const posIndex = new THREE.BufferAttribute(indices, 1);
+
+    this.geometry = new THREE.BufferGeometry();
+    this.geometry.setAttribute("position", posAttribute);
+    this.geometry.setIndex(posIndex);
+  }
+
+  setGeometry(geo) {
+    this.geometry = geo;
   }
 
   setMesh(mesh) {
@@ -127,11 +175,28 @@ class GeometryText extends Geometry {
     this.callback();
   }
 }
+
+class GeometryModel extends Geometry {
+  constructor(model) {
+    super(GEOMETRY_TYPES.MODEL, 1);
+
+    this.callback = (data) => {
+      this.mesh.setFromModel(data);
+    };
+
+    if (model.loaded) {
+      var modelMesh = model.model.children[0];
+      this.geometry = modelMesh.geometry;
+    } else {
+      model.setCallback(this.callback);
+    }
+  }
+}
 //-----------------------------------------------
 
 //! Geometry Functions
 //-----------------------------------------------
 //-----------------------------------------------
 
-export { GEOMETRY_TYPES, Geometry, GeometryText };
+export { GEOMETRY_TYPES, Geometry, GeometryText, GeometryModel };
 //---------------------------------------------------------------

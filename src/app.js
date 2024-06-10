@@ -81,20 +81,18 @@ GUI.setupGUI();
 
 // Setup Physics:-
 //-----------------------------------------------
-
 var generated = false;
-
+SIM.setupSimulation(60);
 //-----------------------------------------------
 
 RENDERER.startRenderLoop(
   // All the callbacks we will send the renderer to execute
   [
     () => {
-      if (CONTROLS.checkKeyDown("p") && !generated) {
+      if (CONTROLS.checkKeyDown("p") && !generated && SIM.canStart) {
         console.log("Start Physics");
         generated = true;
 
-        SIM.setupSimulation(60);
         var body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, SCENE.meshes[2]); // Beyblade
         body1.setup({
           gravity: 1.0,

@@ -12,12 +12,20 @@ var rigidbodies;
 var toSimulate;
 var fixedRate;
 var timer;
+var canStart;
 //-----------------------------------------------
 
 //! Simulation Functions
 //-----------------------------------------------
 function setupSimulation(rate) {
-  setupPhysics();
+  canStart = false;
+  console.log("Simulation set to start physics");
+  import("@dimforge/rapier3d").then(() => {
+    console.log("Rapier loaded");
+    canStart = true;
+    setupPhysics();
+  });
+
   rigidbodies = [];
   toSimulate = false;
   fixedRate = rate;
@@ -128,5 +136,6 @@ export {
   addRigidbody,
   startSimulation,
   wakeWorld,
+  canStart,
 };
 //---------------------------------------------------------------

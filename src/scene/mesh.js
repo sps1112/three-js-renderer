@@ -39,17 +39,17 @@ class Mesh {
   }
 
   updatePosition(position) {
-    this.mesh.position.set(position[0], position[1], position[2]);
+    this.mesh.position.set(position.x, position.y, position.z);
     this.updateGUI();
   }
 
   updateRotation(rotation) {
-    this.mesh.rotation.set(rotation[0], rotation[1], rotation[2]);
+    this.mesh.rotation.set(rotation.x, rotation.y, rotation.z);
     this.updateGUI();
   }
 
   updateScale(scale) {
-    this.mesh.scale.set(scale[0], scale[1], scale[2]);
+    this.mesh.scale.set(scale.x, scale.y, scale.z);
     this.updateGUI();
   }
 

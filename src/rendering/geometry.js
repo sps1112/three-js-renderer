@@ -19,6 +19,7 @@ var GEOMETRY_TYPES = {
   CONE: 7,
   TEXT: 8,
   MODEL: 9,
+  WIREFRAME: 10,
 };
 
 class Geometry {
@@ -116,6 +117,10 @@ class Geometry {
       default:
         break;
     }
+  }
+
+  setupWireframe(geo) {
+    this.geometry = new THREE.WireframeGeometry(geo);
   }
 
   setGeometry(geo) {

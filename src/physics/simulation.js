@@ -48,7 +48,7 @@ function updateWorld(delta) {
       timer -= 1 / fixedRate;
 
       // Take input
-      var force = 10.0;
+      var force = 250.0;
       if (checkKey("w")) {
         rigidbodies[0].rigidbody.applyImpulse(
           {
@@ -85,6 +85,22 @@ function updateWorld(delta) {
             x: force * (1 / fixedRate),
             y: 0,
             z: 0,
+          },
+          true
+        );
+      }
+      var max = 15.0;
+      var speedX = rigidbodies[0].rigidbody.linvel().x;
+      var speedZ = rigidbodies[0].rigidbody.linvel().z;
+      var mag = Math.sqrt(speedX * speedX + speedZ * speedZ);
+      if (mag > max) {
+        speedX = (max * speedX) / mag;
+        speedZ = (max * speedZ) / mag;
+        rigidbodies[0].rigidbody.setLinvel(
+          {
+            x: speedX,
+            y: rigidbodies[0].rigidbody.linvel().y,
+            z: speedZ,
           },
           true
         );

@@ -55,6 +55,10 @@ class Rigidbody {
   }
 
   attachCollider(colliderType, shapeProps, renderCollider) {
+    shapeProps.scale.x *= this.mesh.mesh.scale.x;
+    shapeProps.scale.y *= this.mesh.mesh.scale.y;
+    shapeProps.scale.z *= this.mesh.mesh.scale.z;
+
     // Create Collider object (not initialized)
     var collider = new Collider3D(
       colliderType,
@@ -69,6 +73,20 @@ class Rigidbody {
     // Setup collider with the properties
     this.colliders[index].setup(props);
 
+    renderProps.position = this.colliders[index].shapeProps.offset;
+    var scaleFactor = this.colliders[index].shapeProps.scale;
+    renderProps.position.x =
+      this.mesh.mesh.position.x + renderProps.position.x * scaleFactor.x;
+    renderProps.position.y =
+      this.mesh.mesh.position.y + renderProps.position.y * scaleFactor.y;
+    renderProps.position.z =
+      this.mesh.mesh.position.z + renderProps.position.z * scaleFactor.z;
+
+    renderProps.rotation = this.colliders[index].shapeProps.rotation;
+    renderProps.rotation.x += this.mesh.mesh.rotation.x;
+    renderProps.rotation.y += this.mesh.mesh.rotation.y;
+    renderProps.rotation.z += this.mesh.mesh.rotation.z;
+
     // Render collider
     if (this.colliders[index].render) {
       this.colliders[index].renderCollider(renderProps);
@@ -77,13 +95,9 @@ class Rigidbody {
 
   refreshMesh() {
     // Refresh mesh position
-    this.mesh.updatePosition([
-      this.colliders[0].collider.translation().x,
-      this.colliders[0].collider.translation().y,
-      this.colliders[0].collider.translation().z,
-    ]);
+    this.mesh.updatePosition(this.rigidbody.translation());
 
-    this.mesh.updateQuaternion(this.colliders[0].collider.rotation());
+    this.mesh.updateQuaternion(this.rigidbody.rotation());
 
     // Refresh all colliders which are being rendererd
     this.colliders.forEach((collider) => {

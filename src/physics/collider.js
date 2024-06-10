@@ -9,6 +9,7 @@ import { GEOMETRY_TYPES, Geometry } from "../rendering/geometry";
 import { MATERIAL_TYPES, Material } from "../rendering/material";
 import { CapsuleGeometry } from "three";
 import { addMesh } from "../scene/scene";
+import * as THREE from "three";
 //-----------------------------------------------
 
 //! Collider Variables
@@ -21,12 +22,13 @@ var COLLIDER_TYPES = {
   CAPSULE: 4,
   CYLINDER: 5,
   CONE: 6,
+  WIRE: 7,
 };
 
 class Collider3D {
   constructor(type, shapeProps, rigidbody, render) {
     this.type = type;
-    this.shapeProps = shapeProps;
+    this.shapeProps = shapeProps; // Relative position,rot w.r.t to Local Space
     this.rigidbody = rigidbody;
     this.render = render;
   }
@@ -78,6 +80,10 @@ class Collider3D {
         this.shape = RAPIER.ColliderDesc.cone(this.scale.y, this.scale.x);
         break;
 
+      case COLLIDER_TYPES.WIRE:
+        this.shape = RAPIER.ColliderDesc.trimesh(props.vertices, props.indices);
+        break;
+
       default:
         break;
     }
@@ -85,9 +91,18 @@ class Collider3D {
     // Set the shape with the properties
     this.shape
       .setTranslation(
-        this.shapeProps.offset.x,
-        this.shapeProps.offset.y,
-        this.shapeProps.offset.z
+        this.shapeProps.offset.x * this.scale.x,
+        this.shapeProps.offset.y * this.scale.y,
+        this.shapeProps.offset.z * this.scale.z
+      )
+      .setRotation(
+        new THREE.Quaternion().setFromEuler(
+          new THREE.Euler(
+            this.shapeProps.rotation.x,
+            this.shapeProps.rotation.y,
+            this.shapeProps.rotation.z
+          )
+        )
       )
       .setRestitution(this.restitution * 2.0);
 
@@ -100,17 +115,20 @@ class Collider3D {
   }
 
   renderCollider(renderProps) {
-    var targetPos = renderProps.position;
-    var targetRot = renderProps.rotation;
     var subdivisions = renderProps.subdivisions;
+
     switch (this.type) {
       case COLLIDER_TYPES.BOX:
         this.mesh = new Mesh(
           new Geometry(GEOMETRY_TYPES.CUBE, 1),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
-          [targetPos.x, targetPos.y, targetPos.z],
-          [targetRot.x, targetRot.y, targetRot.z],
-          [1.005 * this.scale.x, 1.005 * this.scale.y, 1.005 * this.scale.z]
+          renderProps.position,
+          renderProps.rotation,
+          {
+            x: 1.005 * this.scale.x,
+            y: 1.005 * this.scale.y,
+            z: 1.005 * this.scale.z,
+          }
         );
         break;
 
@@ -118,9 +136,13 @@ class Collider3D {
         this.mesh = new Mesh(
           new Geometry(GEOMETRY_TYPES.CUBE, 1),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
-          [targetPos.x, targetPos.y, targetPos.z],
-          [targetRot.x, targetRot.y, targetRot.z],
-          [5.005 * this.scale.x, 0.05 * this.scale.y, 5.005 * this.scale.z]
+          renderProps.position,
+          renderProps.rotation,
+          {
+            x: 5.005 * this.scale.x,
+            y: 0.05 * this.scale.y,
+            z: 5.005 * this.scale.z,
+          }
         );
         break;
 
@@ -128,9 +150,13 @@ class Collider3D {
         this.mesh = new Mesh(
           new Geometry(GEOMETRY_TYPES.SPHERE, subdivisions),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
-          [targetPos.x, targetPos.y, targetPos.z],
-          [targetRot.x, targetRot.y, targetRot.z],
-          [1.01 * this.scale.x, 1.01 * this.scale.x, 1.01 * this.scale.x]
+          renderProps.position,
+          renderProps.rotation,
+          {
+            x: 1.01 * this.scale.x,
+            y: 1.01 * this.scale.x,
+            z: 1.01 * this.scale.x,
+          }
         );
         break;
 
@@ -138,9 +164,13 @@ class Collider3D {
         this.mesh = new Mesh(
           new Geometry(GEOMETRY_TYPES.CYLINDER, subdivisions),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
-          [targetPos.x, targetPos.y, targetPos.z],
-          [targetRot.x, targetRot.y, targetRot.z],
-          [1.251 * this.scale.x, 0.251 * this.scale.y, 1.251 * this.scale.x]
+          renderProps.position,
+          renderProps.rotation,
+          {
+            x: 1.251 * this.scale.x,
+            y: 0.251 * this.scale.y,
+            z: 1.251 * this.scale.x,
+          }
         );
         break;
 
@@ -155,9 +185,13 @@ class Collider3D {
         this.mesh = new Mesh(
           geo,
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
-          [targetPos.x, targetPos.y, targetPos.z],
-          [targetRot.x, targetRot.y, targetRot.z],
-          [1.01 * this.scale.x, 1.01, 1.01 * this.scale.x]
+          renderProps.position,
+          renderProps.rotation,
+          {
+            x: 1.01 * this.scale.x,
+            y: 1.01,
+            z: 1.01 * this.scale.x,
+          }
         );
         break;
 
@@ -165,9 +199,13 @@ class Collider3D {
         this.mesh = new Mesh(
           new Geometry(GEOMETRY_TYPES.CYLINDER, subdivisions),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
-          [targetPos.x, targetPos.y, targetPos.z],
-          [targetRot.x, targetRot.y, targetRot.z],
-          [1.01 * this.scale.x, 1.01 * this.scale.y, 1.01 * this.scale.x]
+          renderProps.position,
+          renderProps.rotation,
+          {
+            x: 1.01 * this.scale.x,
+            y: 1.01 * this.scale.y,
+            z: 1.01 * this.scale.x,
+          }
         );
         break;
 
@@ -175,9 +213,13 @@ class Collider3D {
         this.mesh = new Mesh(
           new Geometry(GEOMETRY_TYPES.CONE, subdivisions),
           new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
-          [targetPos.x, targetPos.y, targetPos.z],
-          [targetRot.x, targetRot.y, targetRot.z],
-          [1.01 * this.scale.x, 1.01 * this.scale.y, 1.01 * this.scale.x]
+          renderProps.position,
+          renderProps.rotation,
+          {
+            x: 1.01 * this.scale.x,
+            y: 1.01 * this.scale.y,
+            z: 1.01 * this.scale.x,
+          }
         );
         break;
 
@@ -188,11 +230,7 @@ class Collider3D {
   }
 
   refreshMesh() {
-    this.mesh.updatePosition([
-      this.collider.translation().x,
-      this.collider.translation().y,
-      this.collider.translation().z,
-    ]);
+    this.mesh.updatePosition(this.collider.translation());
 
     this.mesh.updateQuaternion(this.collider.rotation());
   }

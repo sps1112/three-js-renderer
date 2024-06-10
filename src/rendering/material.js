@@ -128,8 +128,9 @@ class Material {
 
       case MATERIAL_TYPES.COLLIDER:
         this.mat = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        this.mat.wireframe = true;
         this.mat.transparent = true;
-        this.mat.opacity = 0.3;
+        this.mat.opacity = 0.5;
 
       default:
         break;

@@ -4,7 +4,7 @@
 //-----------------------------------------------
 import * as RAPIER from "@dimforge/rapier3d";
 import { world } from "./physics";
-import { Collider3D } from "./collider";
+import { Collider3D, COLLIDER_TYPES } from "./collider";
 //-----------------------------------------------
 
 //! Rigidbody Variables
@@ -43,14 +43,19 @@ class Rigidbody {
   }
 
   setup(props) {
-    this.gravity = props.gravity;
-    this.linearVel = props.linearVel;
-    this.angularVel = props.angularVel;
-
     this.data
-      .setGravityScale(this.gravity)
-      .setLinvel(this.linearVel.x, this.linearVel.y, this.linearVel.z)
-      .setAngvel(this.angularVel);
+      .setGravityScale(props.gravity)
+      .setLinvel(props.linearVel.x, props.linearVel.y, props.linearVel.z)
+      .setAngvel(props.angularVel)
+      .setLinearDamping(props.linearDamp)
+      .setAngularDamping(props.angularDamp);
+
+    this.data.setAdditionalMassProperties(
+      0.0, // Mass.
+      props.center, // Center of mass.
+      { x: 0.0, y: 0.0, z: 0.0 }, // Principal angular inertia.
+      { w: 0.0, x: 0.0, y: 0.0, z: 0.0 } // Principal angular inertia frame (unit quaternion).
+    );
     this.rigidbody = world.createRigidBody(this.data);
   }
 
@@ -71,6 +76,17 @@ class Rigidbody {
 
   setupCollider(index, props, renderProps) {
     // Setup collider with the properties
+    if (
+      this.colliders[index].type == COLLIDER_TYPES.MESH ||
+      this.colliders[index].type == COLLIDER_TYPES.CONVEX
+    ) {
+      for (var i = 0; i < props.vertices.length; i += 3) {
+        props.vertices[i] = props.vertices[i] * this.mesh.mesh.scale.x;
+        props.vertices[i + 1] = props.vertices[i + 1] * this.mesh.mesh.scale.y;
+        props.vertices[i + 2] = props.vertices[i + 2] * this.mesh.mesh.scale.z;
+      }
+    }
+
     this.colliders[index].setup(props);
 
     renderProps.position = this.colliders[index].shapeProps.offset;

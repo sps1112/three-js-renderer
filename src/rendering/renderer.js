@@ -104,7 +104,7 @@ function startRenderLoop(list, target) {
 
   // Set Camera to target of choice
   scene.add(camera.cam);
-  camera.setProperties(35.0, Math.PI * 0.27, 0, 0.1, 2);
+  camera.setProperties(35.0, Math.PI * 0.35, 0, 0.1, 2);
   updateFocus(target);
 
   // Setup GUI for the scene

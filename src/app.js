@@ -18,7 +18,6 @@ import * as CONTROLS from "./utils/controls";
 import * as SIM from "./physics/simulation";
 import { RIGIDBODY_TYPES, Rigidbody } from "./physics/rigidbody";
 import { COLLIDER_TYPES, Collider3D } from "./physics/collider";
-import * as THREE from "three";
 
 // Page setup
 window.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -31,7 +30,7 @@ RENDERER.setCamera();
 LOADER.setupLoaders();
 TEXTURE.setupTextures();
 FONT.loadFont("fonts/helvetiker_regular.typeface.json");
-MODEL.loadModel("models/stadium1.glb");
+MODEL.loadModel("models/stadium3.glb");
 MODEL.loadModel("models/beyblade.glb");
 
 // Define the scene
@@ -62,7 +61,7 @@ SCENE.addMesh(
   new MESH.Mesh(
     new GEOMETRY.GeometryModel(MODEL.models[1]),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
-    { x: 0, y: 7.5, z: 0 },
+    { x: 0, y: 10.0, z: 0 },
     { x: 0, y: 0, z: 0 },
     { x: 1, y: 1, z: 1 }
   )
@@ -83,24 +82,7 @@ GUI.setupGUI();
 // Setup Physics:-
 //-----------------------------------------------
 SIM.setupSimulation(60);
-
-// var collider = new Collider3D(
-//   COLLIDER_TYPES.PLANE,
-//   {
-//     scale: { x: 5.0, y: 1.0, z: 5.0 },
-//     offset: { x: 0.0, y: 0.0, z: 0.0 },
-//     rotation: { x: 0.0, y: 0.0, z: 0.0 },
-//   },
-//   null,
-//   true
-// );
-// collider.setup({ restitution: 0.0 });
-// collider.renderCollider({
-//   position: collider.shapeProps.offset,
-//   rotation: collider.shapeProps.rotation,
-//   subdivisions: 3.0,
-// });
-
+var generated = false;
 var body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, SCENE.meshes[2]); // Beyblade
 body1.setup({
   gravity: 1.0,
@@ -111,9 +93,12 @@ body1.setup({
   },
   angularVel: {
     x: 0.0,
-    y: 2.0 * Math.PI * 25.1, // Rotations per second
+    y: 2.0 * Math.PI * 16.0, // Rotations per second
     z: 0.0,
   },
+  linearDamp: 0.05,
+  angularDamp: 0.03,
+  center: { x: 0, y: 0.3, z: 0 },
 });
 
 var body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, SCENE.meshes[1]); // Stadium
@@ -129,6 +114,9 @@ body2.setup({
     y: 2.0 * Math.PI * 0.0, // Rotations per second
     z: 0.0,
   },
+  linearDamp: 0.0,
+  angularDamp: 0.0,
+  center: { x: 0, y: 0, z: 0 },
 });
 
 //-----------------------------------------------
@@ -138,21 +126,27 @@ RENDERER.startRenderLoop(
   [
     SIM.updateWorld,
     () => {
-      if (CONTROLS.checkKeyDown("q")) {
+      if (CONTROLS.checkKeyDown("p") && !generated) {
+        console.log("Start Physics");
+        generated = true;
         body1.attachCollider(
-          COLLIDER_TYPES.CONE,
+          COLLIDER_TYPES.CONVEX,
           {
-            scale: { x: 2.5, y: 1, z: 2.5 },
+            scale: { x: 1, y: 1, z: 1 },
             offset: { x: 0, y: 0, z: 0 },
-            rotation: { x: Math.PI, y: 0, z: 0 },
+            rotation: { x: 0, y: 0, z: 0 },
           },
-          true
+          false
         );
         // Setup collider with properties and add to rigidbody
         body1.setupCollider(
           0,
           {
-            restitution: 0.0,
+            friction: 1.0,
+            restitution: 0.1,
+            density: 3.0,
+            vertices: SCENE.meshes[2].mesh.geometry.attributes.position.array,
+            indices: SCENE.meshes[2].mesh.geometry.index.array,
           },
           {
             subdivisions: 1,
@@ -162,94 +156,22 @@ RENDERER.startRenderLoop(
         SIM.addRigidbody(body1);
 
         body2.attachCollider(
-          COLLIDER_TYPES.PLANE,
+          COLLIDER_TYPES.MESH,
           {
-            scale: { x: 0.5, y: 1, z: 0.5 },
+            scale: { x: 1, y: 1, z: 1 },
             offset: { x: 0, y: 0, z: 0 },
             rotation: { x: 0, y: 0, z: 0 },
           },
-          true
+          false
         );
         body2.setupCollider(
           0,
           {
-            restitution: 0.0,
-          },
-          {
-            subdivisions: 1,
-          }
-        );
-
-        body2.attachCollider(
-          COLLIDER_TYPES.PLANE,
-          {
-            scale: { x: 0.15, y: 0.5, z: 0.4 },
-            offset: { x: 5.8, y: 0.8, z: 0 },
-            rotation: { x: 0, y: 0, z: Math.PI / 2 },
-          },
-          false
-        );
-        body2.setupCollider(
-          1,
-          {
-            restitution: 0.0,
-          },
-          {
-            subdivisions: 1,
-          }
-        );
-
-        body2.attachCollider(
-          COLLIDER_TYPES.PLANE,
-          {
-            scale: { x: 0.15, y: 0.5, z: 0.4 },
-            offset: { x: -5.8, y: 0.8, z: 0 },
-            rotation: { x: 0, y: 0, z: Math.PI / 2 },
-          },
-          false
-        );
-        body2.setupCollider(
-          2,
-          {
-            restitution: 0.0,
-          },
-          {
-            subdivisions: 1,
-          }
-        );
-
-        body2.attachCollider(
-          COLLIDER_TYPES.PLANE,
-          {
-            scale: { x: 0.35, y: 0.5, z: 0.15 },
-            offset: { x: 0, y: 0.8, z: 5.8 },
-            rotation: { x: Math.PI / 2, y: 0, z: 0 },
-          },
-          false
-        );
-        body2.setupCollider(
-          3,
-          {
-            restitution: 0.0,
-          },
-          {
-            subdivisions: 1,
-          }
-        );
-
-        body2.attachCollider(
-          COLLIDER_TYPES.PLANE,
-          {
-            scale: { x: 0.35, y: 0.5, z: 0.15 },
-            offset: { x: 0, y: 0.8, z: -5.8 },
-            rotation: { x: Math.PI / 2, y: 0, z: 0 },
-          },
-          false
-        );
-        body2.setupCollider(
-          4,
-          {
-            restitution: 0.0,
+            friction: 0.2,
+            restitution: 0.2,
+            density: 1.0,
+            vertices: SCENE.meshes[1].mesh.geometry.attributes.position.array,
+            indices: SCENE.meshes[1].mesh.geometry.index.array,
           },
           {
             subdivisions: 1,
@@ -259,6 +181,6 @@ RENDERER.startRenderLoop(
       }
     },
   ],
-  SCENE.meshes[1] // start target for the camera
+  SCENE.meshes[2] // start target for the camera
 );
 //-----------------------------------------------

@@ -19,7 +19,7 @@ var GEOMETRY_TYPES = {
   CONE: 7,
   TEXT: 8,
   MODEL: 9,
-  WIREFRAME: 10,
+  BUFFER: 11,
 };
 
 class Geometry {
@@ -119,8 +119,13 @@ class Geometry {
     }
   }
 
-  setupWireframe(geo) {
-    this.geometry = new THREE.WireframeGeometry(geo);
+  setupBuffer(vertices, indices) {
+    const posAttribute = new THREE.BufferAttribute(vertices, 3);
+    const posIndex = new THREE.BufferAttribute(indices, 1);
+
+    this.geometry = new THREE.BufferGeometry();
+    this.geometry.setAttribute("position", posAttribute);
+    this.geometry.setIndex(posIndex);
   }
 
   setGeometry(geo) {

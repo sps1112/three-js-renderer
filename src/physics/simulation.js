@@ -48,7 +48,7 @@ function updateWorld(delta) {
       timer -= 1 / fixedRate;
 
       // Take input
-      var force = 250.0;
+      var force = 1500.0;
       if (checkKey("w")) {
         rigidbodies[0].rigidbody.applyImpulse(
           {

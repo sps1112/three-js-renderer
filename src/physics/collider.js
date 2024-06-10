@@ -22,7 +22,8 @@ var COLLIDER_TYPES = {
   CAPSULE: 4,
   CYLINDER: 5,
   CONE: 6,
-  WIRE: 7,
+  MESH: 7,
+  CONVEX: 8,
 };
 
 class Collider3D {
@@ -34,7 +35,6 @@ class Collider3D {
   }
 
   setup(props) {
-    this.restitution = props.restitution;
     this.scale = this.shapeProps.scale;
 
     switch (this.type) {
@@ -80,8 +80,19 @@ class Collider3D {
         this.shape = RAPIER.ColliderDesc.cone(this.scale.y, this.scale.x);
         break;
 
-      case COLLIDER_TYPES.WIRE:
+      case COLLIDER_TYPES.MESH:
+        this.vertices = props.vertices;
+        this.indices = props.indices;
         this.shape = RAPIER.ColliderDesc.trimesh(props.vertices, props.indices);
+        break;
+
+      case COLLIDER_TYPES.CONVEX:
+        this.vertices = props.vertices;
+        this.indices = props.indices;
+        this.shape = RAPIER.ColliderDesc.convexHull(
+          props.vertices,
+          props.indices
+        );
         break;
 
       default:
@@ -103,8 +114,13 @@ class Collider3D {
             this.shapeProps.rotation.z
           )
         )
-      )
-      .setRestitution(this.restitution * 2.0);
+      );
+
+    // Set other properties
+    this.shape
+      .setRestitution(props.restitution)
+      .setFriction(props.friction)
+      .setDensity(props.density);
 
     // Create the collider and add to the world
     if (this.rigidbody == null) {
@@ -219,6 +235,23 @@ class Collider3D {
             x: 1.01 * this.scale.x,
             y: 1.01 * this.scale.y,
             z: 1.01 * this.scale.x,
+          }
+        );
+        break;
+
+      case COLLIDER_TYPES.MESH:
+      case COLLIDER_TYPES.CONVEX:
+        var geo = new Geometry(GEOMETRY_TYPES.BUFFER, 1);
+        geo.setupBuffer(this.vertices, this.indices);
+        this.mesh = new Mesh(
+          geo,
+          new Material(MATERIAL_TYPES.COLLIDER, 0xffffff),
+          renderProps.position,
+          renderProps.rotation,
+          {
+            x: 1.01,
+            y: 1.01,
+            z: 1.01,
           }
         );
         break;

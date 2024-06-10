@@ -3,8 +3,6 @@
 //! Mesh Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
-import * as GEOMETRY from "../rendering/geometry";
-import * as MATERIAL from "../rendering/material";
 //-----------------------------------------------
 
 //! Mesh Variables

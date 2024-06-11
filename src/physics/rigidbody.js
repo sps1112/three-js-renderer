@@ -2,8 +2,7 @@
 //---------------------------------------------------------------
 //! Rigidbody Dependencies
 //-----------------------------------------------
-import * as RAPIER from "@dimforge/rapier3d";
-import { world } from "./physics";
+import { RAPIER, world } from "./physics";
 import { Collider3D, COLLIDER_TYPES } from "./collider";
 //-----------------------------------------------
 

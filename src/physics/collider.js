@@ -2,8 +2,7 @@
 //---------------------------------------------------------------
 //! Collider Dependencies
 //-----------------------------------------------
-import * as RAPIER from "@dimforge/rapier3d";
-import { world } from "./physics";
+import { RAPIER, world } from "./physics";
 import { Mesh } from "../scene/mesh";
 import { GEOMETRY_TYPES, Geometry } from "../rendering/geometry";
 import { MATERIAL_TYPES, Material } from "../rendering/material";

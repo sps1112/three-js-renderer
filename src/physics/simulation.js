@@ -17,19 +17,20 @@ var canStart;
 
 //! Simulation Functions
 //-----------------------------------------------
-function setupSimulation(rate) {
+async function setupSimulation(rate) {
   canStart = false;
-  console.log("Simulation set to start physics");
-  import("@dimforge/rapier3d").then(() => {
-    console.log("Rapier loaded");
-    canStart = true;
-    setupPhysics();
-  });
+  console.log("Simulation set to start physics...");
+  setupPhysics(canStartPhysics);
 
   rigidbodies = [];
   toSimulate = false;
   fixedRate = rate;
   timer = 0.0;
+}
+
+function canStartPhysics() {
+  console.log("Can start now as Rapier loaded");
+  canStart = true;
 }
 
 function addRigidbody(rigidbody) {

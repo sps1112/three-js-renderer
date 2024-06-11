@@ -1,7 +1,8 @@
 import wasm from "vite-plugin-wasm";
 import topLevelAwait from "vite-plugin-top-level-await";
+import { defineConfig } from "vite";
 
-export default {
+export default defineConfig({
   root: "./", // Sources files (typically where index.html is)
   publicDir: "static/", // Path from "root" to static assets (files that are served as they are)
   server: {
@@ -12,6 +13,14 @@ export default {
     outDir: "dist", // Output in the dist/ folder
     emptyOutDir: true, // Empty the folder first
     sourcemap: true, // Add sourcemap
+    target: "esnext",
+    // Ensure the WASM files are included in the build output
+    assetsInlineLimit: 0, // Disable inlining of assets (optional, ensures WASM files are separate)
+    rollupOptions: {
+      output: {
+        format: "es",
+      },
+    },
   },
   plugins: [wasm(), topLevelAwait()],
-};
+});

@@ -2,7 +2,7 @@
 //---------------------------------------------------------------
 //! Simulation Dependencies
 //-----------------------------------------------
-import { setupPhysics, updatePhysics } from "./physics";
+import { loadRapier, setupPhysics, updatePhysics } from "./physics";
 import { checkKey, checkKeyDown } from "../utils/controls";
 //-----------------------------------------------
 
@@ -18,19 +18,20 @@ var canStart;
 //! Simulation Functions
 //-----------------------------------------------
 async function setupSimulation(rate) {
+  fixedRate = rate;
   canStart = false;
   console.log("Simulation set to start physics...");
-  setupPhysics(canStartPhysics);
-
-  rigidbodies = [];
-  toSimulate = false;
-  fixedRate = rate;
-  timer = 0.0;
+  await loadRapier(canStartPhysics);
+  console.log("Awaited rapier init.");
 }
 
 function canStartPhysics() {
   console.log("Can start now as Rapier loaded");
   canStart = true;
+  setupPhysics();
+  rigidbodies = [];
+  toSimulate = false;
+  timer = 0.0;
 }
 
 function addRigidbody(rigidbody) {

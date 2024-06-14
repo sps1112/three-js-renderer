@@ -17,7 +17,8 @@ import * as MODEL from "./rendering/model";
 import * as CONTROLS from "./utils/controls";
 import * as SIM from "./physics/simulation";
 import { RIGIDBODY_TYPES, Rigidbody } from "./physics/rigidbody";
-import { COLLIDER_TYPES, Collider3D } from "./physics/collider";
+import { COLLIDER_TYPES } from "./physics/collider";
+import { renderWorld } from "./physics/physics";
 
 // Page setup
 window.addEventListener("contextmenu", (e) => e.preventDefault());
@@ -47,21 +48,23 @@ SCENE.addMesh(
   )
 );
 
+// Stadium
 SCENE.addMesh(
   new MESH.Mesh(
     new GEOMETRY.GeometryModel(MODEL.models[0]),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
     { x: 0, y: 0, z: 0 },
     { x: 0, y: 0, z: 0 },
-    { x: 25, y: 25, z: 25 }
+    { x: 25, y: 30, z: 25 }
   )
 );
 
+// Beyblade
 SCENE.addMesh(
   new MESH.Mesh(
     new GEOMETRY.GeometryModel(MODEL.models[1]),
     new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
-    { x: 0, y: 10.0, z: 0 },
+    { x: 0, y: 10.0, z: 0.0 },
     { x: 0, y: 0, z: 0 },
     { x: 1, y: 1, z: 1 }
   )
@@ -69,9 +72,10 @@ SCENE.addMesh(
 
 // Add Lights
 SCENE.addLight(new LIGHT.AmbientLight(0xffffff, 1));
-SCENE.addLight(new LIGHT.PointLight(0xffffff, 20, 200, [20, 15, 0]));
-SCENE.addLight(new LIGHT.PointLight(0xffffff, 20, 200, [-20, 15, 0]));
-SCENE.addLight(new LIGHT.PointLight(0xffffff, 20, 200, [0, 15, -20]));
+SCENE.addLight(new LIGHT.PointLight(0xffffff, 10, 200, [25, 25, 0]));
+SCENE.addLight(new LIGHT.PointLight(0xffffff, 10, 200, [-25, 25, 0]));
+SCENE.addLight(new LIGHT.PointLight(0xffffff, 10, 200, [0, 25, -25]));
+SCENE.addLight(new LIGHT.PointLight(0xffffff, 10, 200, [0, 25, 25]));
 
 // Add other utilities
 HELPERS.setupLightHelpers();
@@ -82,6 +86,7 @@ GUI.setupGUI();
 // Setup Physics:-
 //-----------------------------------------------
 var generated = false;
+var body1, body2;
 SIM.setupSimulation(60);
 //-----------------------------------------------
 
@@ -91,9 +96,10 @@ RENDERER.startRenderLoop(
     () => {
       if (CONTROLS.checkKeyDown("p") && !generated && SIM.canStart) {
         console.log("Start Physics");
+        SCENE.meshes[0].mesh.visible = false;
         generated = true;
 
-        var body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, SCENE.meshes[2]); // Beyblade
+        body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, SCENE.meshes[2]); // Beyblade
         body1.setup({
           gravity: 1.0,
           linearVel: {
@@ -102,16 +108,18 @@ RENDERER.startRenderLoop(
             z: 0.0,
           },
           angularVel: {
-            x: 0.0,
-            y: 2.0 * Math.PI * 16.0, // Rotations per second
-            z: 0.0,
+            x: 2.0 * Math.PI * 0.0,
+            y: 2.0 * Math.PI * 22.0, // Rotations per second
+            z: 2.0 * Math.PI * 0.0,
           },
-          linearDamp: 0.05,
+          linearDamp: 0.01,
           angularDamp: 0.03,
-          center: { x: 0, y: 0.3, z: 0 },
+          mass: 35.0,
+          center: { x: 0.0, y: -0.15, z: 0.0 },
+          momentIntertia: { x: 0, y: 50, z: 0 },
         });
 
-        var body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, SCENE.meshes[1]); // Stadium
+        body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, SCENE.meshes[1]); // Stadium
         body2.setup({
           gravity: 1.0,
           linearVel: {
@@ -126,7 +134,9 @@ RENDERER.startRenderLoop(
           },
           linearDamp: 0.0,
           angularDamp: 0.0,
+          mass: 0.0,
           center: { x: 0, y: 0, z: 0 },
+          momentIntertia: { x: 0.0, y: 0.0, z: 0.0 },
         });
 
         body1.attachCollider(
@@ -142,9 +152,9 @@ RENDERER.startRenderLoop(
         body1.setupCollider(
           0,
           {
-            friction: 1.0,
-            restitution: 0.1,
-            density: 3.0,
+            friction: 0.7,
+            restitution: 0.25,
+            density: 2.0,
             vertices: SCENE.meshes[2].mesh.geometry.attributes.position.array,
             indices: SCENE.meshes[2].mesh.geometry.index.array,
           },
@@ -167,8 +177,8 @@ RENDERER.startRenderLoop(
         body2.setupCollider(
           0,
           {
-            friction: 0.2,
-            restitution: 0.2,
+            friction: 0.3, // Some friction from the stadium
+            restitution: 0.0,
             density: 1.0,
             vertices: SCENE.meshes[1].mesh.geometry.attributes.position.array,
             indices: SCENE.meshes[1].mesh.geometry.index.array,
@@ -181,6 +191,19 @@ RENDERER.startRenderLoop(
       }
     },
     SIM.updateWorld,
+    () => {
+      if (CONTROLS.checkKey("m")) {
+        RENDERER.updateFocus(SCENE.meshes[1]);
+      }
+      if (CONTROLS.checkKey("n")) {
+        RENDERER.updateFocus(SCENE.meshes[2]);
+      }
+    },
+    () => {
+      if (CONTROLS.checkKeyDown("o")) {
+        renderWorld();
+      }
+    },
   ],
   SCENE.meshes[2] // start target for the camera
 );

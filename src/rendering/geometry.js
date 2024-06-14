@@ -19,7 +19,8 @@ var GEOMETRY_TYPES = {
   CONE: 7,
   TEXT: 8,
   MODEL: 9,
-  BUFFER: 11,
+  BUFFER: 10,
+  DEBUG: 11,
 };
 
 class Geometry {
@@ -121,11 +122,22 @@ class Geometry {
 
   setupBuffer(vertices, indices) {
     const posAttribute = new THREE.BufferAttribute(vertices, 3);
-    const posIndex = new THREE.BufferAttribute(indices, 1);
 
     this.geometry = new THREE.BufferGeometry();
     this.geometry.setAttribute("position", posAttribute);
-    this.geometry.setIndex(posIndex);
+    if (indices) {
+      const posIndex = new THREE.BufferAttribute(indices, 1);
+      this.geometry.setIndex(posIndex);
+    }
+  }
+
+  setupDebug(vertices, colors) {
+    const posAttribute = new THREE.BufferAttribute(vertices, 3);
+    const colorAttribute = new THREE.BufferAttribute(colors, 4);
+
+    this.geometry = new THREE.BufferGeometry();
+    this.geometry.setAttribute("position", posAttribute);
+    this.geometry.setAttribute("color", colorAttribute);
   }
 
   setGeometry(geo) {

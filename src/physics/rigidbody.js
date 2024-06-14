@@ -50,10 +50,10 @@ class Rigidbody {
       .setAngularDamping(props.angularDamp);
 
     this.data.setAdditionalMassProperties(
-      0.0, // Mass.
+      props.mass, // Mass.
       props.center, // Center of mass.
-      { x: 0.0, y: 0.0, z: 0.0 }, // Principal angular inertia.
-      { w: 0.0, x: 0.0, y: 0.0, z: 0.0 } // Principal angular inertia frame (unit quaternion).
+      props.momentIntertia, // Principal angular inertia.
+      { w: 1.0, x: 0.0, y: 0.0, z: 0.0 } // Principal angular inertia frame (unit quaternion).
     );
     this.rigidbody = world.createRigidBody(this.data);
   }

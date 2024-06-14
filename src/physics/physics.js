@@ -3,6 +3,10 @@
 //! Physics Dependencies
 //-----------------------------------------------
 import RAPIER from "https://cdn.skypack.dev/@dimforge/rapier3d-compat";
+import { GEOMETRY_TYPES, Geometry } from "../rendering/geometry";
+import { MATERIAL_TYPES, Material } from "../rendering/material";
+import { Mesh } from "../scene/mesh";
+import { addMesh } from "../scene/scene";
 //-----------------------------------------------
 
 //! Physics Variables
@@ -38,7 +42,24 @@ function setupPhysics() {
 function updatePhysics() {
   world.step();
 }
+
+function renderWorld() {
+  const { vertices, colors } = world.debugRender();
+  var debugGeo = new Geometry(GEOMETRY_TYPES.DEBUG, 1);
+  debugGeo.setupDebug(vertices, colors);
+  var mat = new Material(MATERIAL_TYPES.WIRE, 0xffffff);
+  mat.mat.vertexColors = true;
+  addMesh(
+    new Mesh(
+      debugGeo,
+      mat,
+      { x: 0, y: 0, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      { x: 1, y: 1, z: 1 }
+    )
+  );
+}
 //-----------------------------------------------
 
-export { RAPIER, loadRapier, world, setupPhysics, updatePhysics };
+export { RAPIER, loadRapier, world, setupPhysics, updatePhysics, renderWorld };
 //---------------------------------------------------------------

@@ -33,26 +33,28 @@ class Camera {
   }
 
   updateLookAt(delta) {
-    if (checkMouseButton(2)) {
-      this.updateAngle({
-        x: -checkMouseMove().x * delta,
-        y: checkMouseMove().y * delta,
-      });
+    if (this.target) {
+      if (checkMouseButton(2)) {
+        this.updateAngle({
+          x: -checkMouseMove().x * delta,
+          y: checkMouseMove().y * delta,
+        });
+      }
+      this.updateDistance(this.scrollSpeed * checkMouseScroll() * delta);
+
+      var targetPos = this.target.mesh.position;
+      var offset = new THREE.Vector3().setFromSphericalCoords(
+        this.distance,
+        this.pitch,
+        this.yaw
+      );
+
+      var final = offset.add(targetPos);
+      this.cam.position.lerp(final, this.dampness);
+
+      this.currentLookAt.lerp(targetPos, this.dampness);
+      this.cam.lookAt(this.currentLookAt);
     }
-    this.updateDistance(this.scrollSpeed * checkMouseScroll() * delta);
-
-    var targetPos = this.target.mesh.position;
-    var offset = new THREE.Vector3().setFromSphericalCoords(
-      this.distance,
-      this.pitch,
-      this.yaw
-    );
-
-    var final = offset.add(targetPos);
-    this.cam.position.lerp(final, this.dampness);
-
-    this.currentLookAt.lerp(targetPos, this.dampness);
-    this.cam.lookAt(this.currentLookAt);
   }
 
   updateAngle(diff) {

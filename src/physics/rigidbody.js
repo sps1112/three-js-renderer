@@ -79,11 +79,13 @@ class Rigidbody {
       this.colliders[index].type == COLLIDER_TYPES.MESH ||
       this.colliders[index].type == COLLIDER_TYPES.CONVEX
     ) {
+      var newVertices = new Float32Array(props.vertices.length);
       for (var i = 0; i < props.vertices.length; i += 3) {
-        props.vertices[i] = props.vertices[i] * this.mesh.mesh.scale.x;
-        props.vertices[i + 1] = props.vertices[i + 1] * this.mesh.mesh.scale.y;
-        props.vertices[i + 2] = props.vertices[i + 2] * this.mesh.mesh.scale.z;
+        newVertices[i] = props.vertices[i] * this.mesh.mesh.scale.x;
+        newVertices[i + 1] = props.vertices[i + 1] * this.mesh.mesh.scale.y;
+        newVertices[i + 2] = props.vertices[i + 2] * this.mesh.mesh.scale.z;
       }
+      props.vertices = newVertices;
     }
 
     this.colliders[index].setup(props);

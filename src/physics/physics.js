@@ -22,7 +22,6 @@ async function loadRapier(callback) {
   try {
     await RAPIER.init();
     console.log("Rapier loaded as:-");
-    console.log(RAPIER);
     callback();
   } catch (error) {
     console.error("Error loading Rapier:", error);
@@ -32,9 +31,6 @@ async function loadRapier(callback) {
 function setupPhysics() {
   console.log("Setting world as Rapier is loaded");
   gravity = { x: 0.0, y: -9.81, z: 0.0 };
-  console.log(RAPIER);
-  console.log(RAPIER.World);
-  // console.log(RAPIER.RawIntegrationParameters());
   world = new RAPIER.World(gravity);
   console.log("Setup World complete");
 }

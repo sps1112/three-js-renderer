@@ -197,8 +197,7 @@ class GeometryModel extends Geometry {
     };
 
     if (model.loaded) {
-      var modelMesh = model.model.children[0];
-      this.geometry = modelMesh.geometry;
+      this.data = model;
     } else {
       model.setCallback(this.callback);
     }

@@ -3,6 +3,7 @@
 //! Mesh Dependencies
 //-----------------------------------------------
 import * as THREE from "three";
+import { GEOMETRY_TYPES } from "../rendering/geometry";
 //-----------------------------------------------
 
 //! Mesh Variables
@@ -13,7 +14,13 @@ class Mesh {
     this.geometry.setMesh(this);
     this.material = material;
     this.mesh = new THREE.Mesh(this.geometry.geometry, this.material.mat);
-
+    if (
+      geometry.type == GEOMETRY_TYPES.MODEL &&
+      geometry.data &&
+      geometry.data.loaded == true
+    ) {
+      this.setFromModel(this.geometry.data.model);
+    }
     // Set default transform
     this.position = position;
     this.rotation = rotation;
@@ -77,6 +84,7 @@ class Mesh {
     this.material.setTexture(modelMesh.material.map);
     this.material.mat.roughness = 0.3;
     this.material.mat.metalness = 0.5;
+    console.log("Model set");
     this.update();
   }
 }

@@ -88,10 +88,7 @@ class Collider3D {
       case COLLIDER_TYPES.CONVEX:
         this.vertices = props.vertices;
         this.indices = props.indices;
-        this.shape = RAPIER.ColliderDesc.convexHull(
-          props.vertices,
-          props.indices
-        );
+        this.shape = RAPIER.ColliderDesc.convexHull(this.vertices);
         break;
 
       default:

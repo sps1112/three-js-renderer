@@ -17,10 +17,8 @@ import * as MODEL from "./rendering/model";
 import * as CONTROLS from "./utils/controls";
 import * as SIM from "./physics/simulation";
 import { RIGIDBODY_TYPES, Rigidbody } from "./physics/rigidbody";
-import { COLLIDER_TYPES, Collider3D } from "./physics/collider";
-
-// Page setup
-window.addEventListener("contextmenu", (e) => e.preventDefault());
+import { COLLIDER_TYPES } from "./physics/collider";
+import { getWorldData } from "./physics/physics";
 
 // Setup Renderer components
 RENDERER.setupRenderer();
@@ -30,51 +28,20 @@ RENDERER.setCamera();
 LOADER.setupLoaders();
 TEXTURE.setupTextures();
 FONT.loadFont("fonts/helvetiker_regular.typeface.json");
+MODEL.loadModel("models/stadium1.glb");
+MODEL.loadModel("models/stadium2.glb");
 MODEL.loadModel("models/stadium3.glb");
 MODEL.loadModel("models/beyblade.glb");
 
 // Define the scene
+var currentStadium = 0;
+var stadiumMesh = null;
+var beybladeMesh = null;
+var colliderMesh = null;
+var renderingColliders = false;
 SCENE.setupScene();
 SCENE.loadEnvironment("textures/environmentMap/workshop.hdr");
-
-SCENE.addMesh(
-  new MESH.Mesh(
-    new GEOMETRY.GeometryText(3, "Beyblade Simulator", FONT.fonts[0]),
-    new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.TEXT, 0xaa00ff),
-    { x: 0, y: 20, z: 0 },
-    { x: 0, y: 0, z: 0 },
-    { x: 5, y: 5, z: 5 }
-  )
-);
-
-SCENE.addMesh(
-  new MESH.Mesh(
-    new GEOMETRY.GeometryModel(MODEL.models[0]),
-    new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
-    { x: 0, y: 0, z: 0 },
-    { x: 0, y: 0, z: 0 },
-    { x: 25, y: 25, z: 25 }
-  )
-);
-
-SCENE.addMesh(
-  new MESH.Mesh(
-    new GEOMETRY.GeometryModel(MODEL.models[1]),
-    new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
-    { x: 0, y: 10.0, z: 0 },
-    { x: 0, y: 0, z: 0 },
-    { x: 1, y: 1, z: 1 }
-  )
-);
-
-// Add Lights
-SCENE.addLight(new LIGHT.AmbientLight(0xffffff, 1));
-SCENE.addLight(new LIGHT.PointLight(0xffffff, 20, 200, [20, 15, 0]));
-SCENE.addLight(new LIGHT.PointLight(0xffffff, 20, 200, [-20, 15, 0]));
-SCENE.addLight(new LIGHT.PointLight(0xffffff, 20, 200, [0, 15, -20]));
-
-// Add other utilities
-HELPERS.setupLightHelpers();
+setupLoadingScene();
 
 // Define the GUI
 GUI.setupGUI();
@@ -82,6 +49,7 @@ GUI.setupGUI();
 // Setup Physics:-
 //-----------------------------------------------
 var generated = false;
+var body1, body2;
 SIM.setupSimulation(60);
 //-----------------------------------------------
 
@@ -90,98 +58,241 @@ RENDERER.startRenderLoop(
   [
     () => {
       if (CONTROLS.checkKeyDown("p") && !generated && SIM.canStart) {
-        console.log("Start Physics");
-        generated = true;
-
-        var body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, SCENE.meshes[2]); // Beyblade
-        body1.setup({
-          gravity: 1.0,
-          linearVel: {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-          },
-          angularVel: {
-            x: 0.0,
-            y: 2.0 * Math.PI * 16.0, // Rotations per second
-            z: 0.0,
-          },
-          linearDamp: 0.05,
-          angularDamp: 0.03,
-          center: { x: 0, y: 0.3, z: 0 },
-        });
-
-        var body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, SCENE.meshes[1]); // Stadium
-        body2.setup({
-          gravity: 1.0,
-          linearVel: {
-            x: 0.0,
-            y: 0.0,
-            z: 0.0,
-          },
-          angularVel: {
-            x: 0.0,
-            y: 2.0 * Math.PI * 0.0, // Rotations per second
-            z: 0.0,
-          },
-          linearDamp: 0.0,
-          angularDamp: 0.0,
-          center: { x: 0, y: 0, z: 0 },
-        });
-
-        body1.attachCollider(
-          COLLIDER_TYPES.CONVEX,
-          {
-            scale: { x: 1, y: 1, z: 1 },
-            offset: { x: 0, y: 0, z: 0 },
-            rotation: { x: 0, y: 0, z: 0 },
-          },
-          false
-        );
-        // Setup collider with properties and add to rigidbody
-        body1.setupCollider(
-          0,
-          {
-            friction: 1.0,
-            restitution: 0.1,
-            density: 3.0,
-            vertices: SCENE.meshes[2].mesh.geometry.attributes.position.array,
-            indices: SCENE.meshes[2].mesh.geometry.index.array,
-          },
-          {
-            subdivisions: 1,
-          }
-        );
-        // Finally add this rigidbody to the simulation
-        SIM.addRigidbody(body1);
-
-        body2.attachCollider(
-          COLLIDER_TYPES.MESH,
-          {
-            scale: { x: 1, y: 1, z: 1 },
-            offset: { x: 0, y: 0, z: 0 },
-            rotation: { x: 0, y: 0, z: 0 },
-          },
-          false
-        );
-        body2.setupCollider(
-          0,
-          {
-            friction: 0.2,
-            restitution: 0.2,
-            density: 1.0,
-            vertices: SCENE.meshes[1].mesh.geometry.attributes.position.array,
-            indices: SCENE.meshes[1].mesh.geometry.index.array,
-          },
-          {
-            subdivisions: 1,
-          }
-        );
-        SIM.addRigidbody(body2);
+        setupGameScene();
+        setupGamePhysics();
       }
     },
     SIM.updateWorld,
-  ],
-  SCENE.meshes[2] // start target for the camera
+    () => {
+      if (generated) {
+        if (CONTROLS.checkKey("m")) {
+          RENDERER.updateFocus(stadiumMesh);
+        }
+        if (CONTROLS.checkKey("n")) {
+          RENDERER.updateFocus(beybladeMesh);
+        }
+        if (CONTROLS.checkKeyDown("o")) {
+          renderWorldColliders();
+        }
+      } else {
+        if (CONTROLS.checkKeyUp("1")) {
+          loadStadium(1);
+        }
+        if (CONTROLS.checkKeyUp("2")) {
+          loadStadium(2);
+        }
+        if (CONTROLS.checkKeyUp("3")) {
+          loadStadium(3);
+        }
+      }
+    },
+  ]
 );
 //-----------------------------------------------
+
+function setupLoadingScene() {
+  SCENE.addMesh(
+    new MESH.Mesh(
+      new GEOMETRY.GeometryText(3, "Beyblade Simulator", FONT.fonts[0]),
+      new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.TEXT, 0xaa00ff),
+      { x: 0, y: 28, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      { x: 7, y: 7, z: 7 }
+    )
+  );
+
+  SCENE.addMesh(
+    new MESH.Mesh(
+      new GEOMETRY.GeometryText(
+        5,
+        "Press 1,2,3 to switch stadium",
+        FONT.fonts[0]
+      ),
+      new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.TEXT, 0xaa00ff),
+      { x: 0, y: 20, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      { x: 3.5, y: 3.5, z: 3.5 }
+    )
+  );
+
+  SCENE.addMesh(
+    new MESH.Mesh(
+      new GEOMETRY.GeometryText(5, 'Press "P" to play', FONT.fonts[0]),
+      new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.TEXT, 0xaa00ff),
+      { x: 0, y: 16, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      { x: 3.5, y: 3.5, z: 3.5 }
+    )
+  );
+
+  // Stadium
+  loadStadium(3);
+}
+
+function loadStadium(id) {
+  // Changing to a new stadium
+  if (id != currentStadium) {
+    if (stadiumMesh) {
+      stadiumMesh.mesh.visible = false;
+    }
+    stadiumMesh = new MESH.Mesh(
+      new GEOMETRY.GeometryModel(MODEL.models[id - 1]),
+      new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
+      { x: 0, y: 0, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      { x: 25, y: 25, z: 25 }
+    );
+    SCENE.addMesh(stadiumMesh);
+    currentStadium = id;
+  }
+}
+
+function setupGameScene() {
+  // Beyblade
+  beybladeMesh = new MESH.Mesh(
+    new GEOMETRY.GeometryModel(MODEL.models[3]),
+    new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
+    { x: 0, y: 10.0, z: 15.0 },
+    { x: 0, y: 0, z: 0 },
+    { x: 1, y: 1, z: 1 }
+  );
+  SCENE.addMesh(beybladeMesh);
+
+  // Add Lights
+  SCENE.addLight(new LIGHT.AmbientLight(0xffffff, 1));
+  SCENE.addLight(new LIGHT.PointLight(0xffffff, 10, 200, [25, 25, 0]));
+  SCENE.addLight(new LIGHT.PointLight(0xffffff, 10, 200, [-25, 25, 0]));
+  SCENE.addLight(new LIGHT.PointLight(0xffffff, 10, 200, [0, 25, -25]));
+  SCENE.addLight(new LIGHT.PointLight(0xffffff, 10, 200, [0, 25, 25]));
+
+  // Add other utilities
+  HELPERS.setupLightHelpers();
+}
+
+function setupGamePhysics() {
+  SCENE.meshes[0].mesh.visible = false;
+  SCENE.meshes[1].mesh.visible = false;
+  SCENE.meshes[2].mesh.visible = false;
+  generated = true;
+
+  body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, beybladeMesh); // Beyblade
+  body1.setup({
+    gravity: 1.0,
+    linearVel: {
+      x: 0.0,
+      y: 0.0,
+      z: -15.0,
+    },
+    angularVel: {
+      x: 2.0 * Math.PI * 0.0,
+      y: 2.0 * Math.PI * 20.0, // Rotations per second
+      z: 2.0 * Math.PI * 0.0,
+    },
+    linearDamp: 0.015,
+    angularDamp: 0.03,
+    mass: 35.0,
+    center: { x: 0.0, y: -0.15, z: 0.0 },
+    momentIntertia: { x: 0, y: 50, z: 0 },
+  });
+
+  body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, stadiumMesh); // Stadium
+  body2.setup({
+    gravity: 1.0,
+    linearVel: {
+      x: 0.0,
+      y: 0.0,
+      z: 0.0,
+    },
+    angularVel: {
+      x: 0.0,
+      y: 2.0 * Math.PI * 0.0, // Rotations per second
+      z: 0.0,
+    },
+    linearDamp: 0.0,
+    angularDamp: 0.0,
+    mass: 0.0,
+    center: { x: 0, y: 0, z: 0 },
+    momentIntertia: { x: 0.0, y: 0.0, z: 0.0 },
+  });
+
+  body1.attachCollider(
+    COLLIDER_TYPES.CONVEX,
+    {
+      scale: { x: 1, y: 1, z: 1 },
+      offset: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+    },
+    false
+  );
+  // Setup collider with properties and add to rigidbody
+  body1.setupCollider(
+    0,
+    {
+      friction: 0.7,
+      restitution: 0.25,
+      density: 2.0,
+      vertices: beybladeMesh.mesh.geometry.attributes.position.array,
+      indices: beybladeMesh.mesh.geometry.index.array,
+    },
+    {
+      subdivisions: 1,
+    }
+  );
+  // Finally add this rigidbody to the simulation
+  SIM.addRigidbody(body1);
+
+  body2.attachCollider(
+    COLLIDER_TYPES.MESH,
+    {
+      scale: { x: 1, y: 1, z: 1 },
+      offset: { x: 0, y: 0, z: 0 },
+      rotation: { x: 0, y: 0, z: 0 },
+    },
+    false
+  );
+  body2.setupCollider(
+    0,
+    {
+      friction: 0.3, // Some friction from the stadium
+      restitution: 0.0,
+      density: 1.0,
+      vertices: stadiumMesh.mesh.geometry.attributes.position.array,
+      indices: stadiumMesh.mesh.geometry.index.array,
+    },
+    {
+      subdivisions: 1,
+    }
+  );
+  SIM.addRigidbody(body2);
+  RENDERER.updateFocus(beybladeMesh);
+}
+
+function renderWorldColliders() {
+  if (renderingColliders) {
+    colliderMesh.mesh.visible = false;
+  } else {
+    if (colliderMesh != null) {
+      var { vertices, colors } = getWorldData();
+      var debugGeo = new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.DEBUG, 1);
+      debugGeo.setupDebug(vertices, colors);
+      colliderMesh.geometry = debugGeo;
+      colliderMesh.update();
+      colliderMesh.mesh.visible = true;
+    } else {
+      var { vertices, colors } = getWorldData();
+      var debugGeo = new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.DEBUG, 1);
+      debugGeo.setupDebug(vertices, colors);
+      var mat = new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.WIRE, 0xffffff);
+      mat.mat.vertexColors = true;
+      colliderMesh = new MESH.Mesh(
+        debugGeo,
+        mat,
+        { x: 0, y: 0, z: 0 },
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 1, z: 1 }
+      );
+      SCENE.addMesh(colliderMesh);
+    }
+  }
+  renderingColliders = !renderingColliders;
+}

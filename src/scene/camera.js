@@ -28,30 +28,33 @@ class Camera {
 
   setTarget(target) {
     this.target = target; // Mesh class
+    this.currentLookAt = new THREE.Vector3().copy(target.mesh.position);
     this.updateLookAt(0.0);
   }
 
   updateLookAt(delta) {
-    if (checkMouseButton(2)) {
-      this.updateAngle({
-        x: -checkMouseMove().x * delta,
-        y: checkMouseMove().y * delta,
-      });
+    if (this.target) {
+      if (checkMouseButton(2)) {
+        this.updateAngle({
+          x: -checkMouseMove().x * delta,
+          y: checkMouseMove().y * delta,
+        });
+      }
+      this.updateDistance(this.scrollSpeed * checkMouseScroll() * delta);
+
+      var targetPos = this.target.mesh.position;
+      var offset = new THREE.Vector3().setFromSphericalCoords(
+        this.distance,
+        this.pitch,
+        this.yaw
+      );
+
+      var final = offset.add(targetPos);
+      this.cam.position.lerp(final, this.dampness);
+
+      this.currentLookAt.lerp(targetPos, this.dampness);
+      this.cam.lookAt(this.currentLookAt);
     }
-    this.updateDistance(this.scrollSpeed * checkMouseScroll() * delta);
-
-    var targetPos = this.target.mesh.position;
-    var offset = new THREE.Vector3().setFromSphericalCoords(
-      this.distance,
-      this.pitch,
-      this.yaw
-    );
-
-    var final = offset.add(targetPos);
-
-    // this.cam.position.set(final.x, final.y, final.z);
-    this.cam.position.lerp(final, this.dampness);
-    this.cam.lookAt(targetPos);
   }
 
   updateAngle(diff) {
@@ -70,6 +73,19 @@ class Camera {
   updateDistance(diff) {
     this.distance += diff;
     this.distance = clamp(this.distance, 0.1, 100.0);
+  }
+
+  getForward() {
+    var diff = {
+      x: this.currentLookAt.x - this.cam.position.x,
+      y: this.currentLookAt.y - this.cam.position.y,
+      z: this.currentLookAt.z - this.cam.position.z,
+    };
+    diff.y = 0;
+    var mag = Math.sqrt(diff.x * diff.x + diff.z * diff.z);
+    diff.x /= mag;
+    diff.z /= mag;
+    return diff;
   }
 }
 

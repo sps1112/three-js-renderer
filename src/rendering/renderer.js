@@ -39,6 +39,8 @@ var callbacks;
 //! Renderer Functions
 //-----------------------------------------------
 function setupRenderer() {
+  window.addEventListener("contextmenu", (e) => e.preventDefault());
+
   canvasSize = {
     width: window.innerWidth,
     height: window.innerHeight,
@@ -63,7 +65,7 @@ function setCamera() {
   // camera = new OrthographicCam(orthoSize, aspectRatio, 0.1, 1000, 5);
   camera.cam.position.x = 0.0;
   camera.cam.position.y = 20.0;
-  camera.cam.position.z = 20.0;
+  camera.cam.position.z = 30.0;
 }
 
 function resizeRenderer() {
@@ -104,8 +106,10 @@ function startRenderLoop(list, target) {
 
   // Set Camera to target of choice
   scene.add(camera.cam);
-  camera.setProperties(35.0, Math.PI * 0.35, 0, 0.1, 2);
-  updateFocus(target);
+  camera.setProperties(25.0, Math.PI * 0.33, 0, 0.1, 2);
+  if (target) {
+    updateFocus(target);
+  }
 
   // Setup GUI for the scene
   if (gui) {

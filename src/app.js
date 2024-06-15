@@ -18,7 +18,7 @@ import * as CONTROLS from "./utils/controls";
 import * as SIM from "./physics/simulation";
 import { RIGIDBODY_TYPES, Rigidbody } from "./physics/rigidbody";
 import { COLLIDER_TYPES } from "./physics/collider";
-import { renderWorld } from "./physics/physics";
+import { getWorldData } from "./physics/physics";
 
 // Setup Renderer components
 RENDERER.setupRenderer();
@@ -37,6 +37,8 @@ MODEL.loadModel("models/beyblade.glb");
 var currentStadium = 0;
 var stadiumMesh = null;
 var beybladeMesh = null;
+var colliderMesh = null;
+var renderingColliders = false;
 SCENE.setupScene();
 SCENE.loadEnvironment("textures/environmentMap/workshop.hdr");
 setupLoadingScene();
@@ -70,7 +72,7 @@ RENDERER.startRenderLoop(
           RENDERER.updateFocus(beybladeMesh);
         }
         if (CONTROLS.checkKeyDown("o")) {
-          renderWorld();
+          renderWorldColliders();
         }
       } else {
         if (CONTROLS.checkKeyUp("1")) {
@@ -263,4 +265,34 @@ function setupGamePhysics() {
   );
   SIM.addRigidbody(body2);
   RENDERER.updateFocus(beybladeMesh);
+}
+
+function renderWorldColliders() {
+  if (renderingColliders) {
+    colliderMesh.mesh.visible = false;
+  } else {
+    if (colliderMesh != null) {
+      var { vertices, colors } = getWorldData();
+      var debugGeo = new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.DEBUG, 1);
+      debugGeo.setupDebug(vertices, colors);
+      colliderMesh.geometry = debugGeo;
+      colliderMesh.update();
+      colliderMesh.mesh.visible = true;
+    } else {
+      var { vertices, colors } = getWorldData();
+      var debugGeo = new GEOMETRY.Geometry(GEOMETRY.GEOMETRY_TYPES.DEBUG, 1);
+      debugGeo.setupDebug(vertices, colors);
+      var mat = new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.WIRE, 0xffffff);
+      mat.mat.vertexColors = true;
+      colliderMesh = new MESH.Mesh(
+        debugGeo,
+        mat,
+        { x: 0, y: 0, z: 0 },
+        { x: 0, y: 0, z: 0 },
+        { x: 1, y: 1, z: 1 }
+      );
+      SCENE.addMesh(colliderMesh);
+    }
+  }
+  renderingColliders = !renderingColliders;
 }

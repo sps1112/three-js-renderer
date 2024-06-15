@@ -59,7 +59,7 @@ function updateWorld(delta) {
       timer -= 1 / fixedRate;
 
       // Check Input
-      var force = 1100.0;
+      var force = 2000.0;
       var direction = { x: 0, y: 0, z: 0 };
       if (checkKey("w")) {
         direction.x = camera.getForward().x;

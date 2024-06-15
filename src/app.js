@@ -34,11 +34,12 @@ MODEL.loadModel("models/stadium3.glb");
 MODEL.loadModel("models/beyblade.glb");
 
 // Define the scene
+var currentStadium = 0;
+var stadiumMesh = null;
+var beybladeMesh = null;
 SCENE.setupScene();
 SCENE.loadEnvironment("textures/environmentMap/workshop.hdr");
 setupLoadingScene();
-
-// setupGameScene();
 
 // Define the GUI
 GUI.setupGUI();
@@ -63,13 +64,23 @@ RENDERER.startRenderLoop(
     () => {
       if (generated) {
         if (CONTROLS.checkKey("m")) {
-          RENDERER.updateFocus(SCENE.meshes[2]);
+          RENDERER.updateFocus(stadiumMesh);
         }
         if (CONTROLS.checkKey("n")) {
-          RENDERER.updateFocus(SCENE.meshes[3]);
+          RENDERER.updateFocus(beybladeMesh);
         }
         if (CONTROLS.checkKeyDown("o")) {
           renderWorld();
+        }
+      } else {
+        if (CONTROLS.checkKeyUp("1")) {
+          loadStadium(1);
+        }
+        if (CONTROLS.checkKeyUp("2")) {
+          loadStadium(2);
+        }
+        if (CONTROLS.checkKeyUp("3")) {
+          loadStadium(3);
         }
       }
     },
@@ -90,37 +101,60 @@ function setupLoadingScene() {
 
   SCENE.addMesh(
     new MESH.Mesh(
+      new GEOMETRY.GeometryText(
+        5,
+        "Press 1,2,3 to switch stadium",
+        FONT.fonts[0]
+      ),
+      new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.TEXT, 0xaa00ff),
+      { x: 0, y: 20, z: 0 },
+      { x: 0, y: 0, z: 0 },
+      { x: 3.5, y: 3.5, z: 3.5 }
+    )
+  );
+
+  SCENE.addMesh(
+    new MESH.Mesh(
       new GEOMETRY.GeometryText(5, 'Press "P" to play', FONT.fonts[0]),
       new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.TEXT, 0xaa00ff),
-      { x: 0, y: 17, z: 0 },
+      { x: 0, y: 16, z: 0 },
       { x: 0, y: 0, z: 0 },
-      { x: 4, y: 4, z: 4 }
+      { x: 3.5, y: 3.5, z: 3.5 }
     )
   );
 
   // Stadium
-  SCENE.addMesh(
-    new MESH.Mesh(
-      new GEOMETRY.GeometryModel(MODEL.models[2]),
+  loadStadium(3);
+}
+
+function loadStadium(id) {
+  // Changing to a new stadium
+  if (id != currentStadium) {
+    if (stadiumMesh) {
+      stadiumMesh.mesh.visible = false;
+    }
+    stadiumMesh = new MESH.Mesh(
+      new GEOMETRY.GeometryModel(MODEL.models[id - 1]),
       new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
       { x: 0, y: 0, z: 0 },
       { x: 0, y: 0, z: 0 },
       { x: 25, y: 25, z: 25 }
-    )
-  );
+    );
+    SCENE.addMesh(stadiumMesh);
+    currentStadium = id;
+  }
 }
 
 function setupGameScene() {
   // Beyblade
-  SCENE.addMesh(
-    new MESH.Mesh(
-      new GEOMETRY.GeometryModel(MODEL.models[3]),
-      new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
-      { x: 0, y: 10.0, z: 15.0 },
-      { x: 0, y: 0, z: 0 },
-      { x: 1, y: 1, z: 1 }
-    )
+  beybladeMesh = new MESH.Mesh(
+    new GEOMETRY.GeometryModel(MODEL.models[3]),
+    new MATERIAL.Material(MATERIAL.MATERIAL_TYPES.LIT, 0xffffff),
+    { x: 0, y: 10.0, z: 15.0 },
+    { x: 0, y: 0, z: 0 },
+    { x: 1, y: 1, z: 1 }
   );
+  SCENE.addMesh(beybladeMesh);
 
   // Add Lights
   SCENE.addLight(new LIGHT.AmbientLight(0xffffff, 1));
@@ -136,9 +170,10 @@ function setupGameScene() {
 function setupGamePhysics() {
   SCENE.meshes[0].mesh.visible = false;
   SCENE.meshes[1].mesh.visible = false;
+  SCENE.meshes[2].mesh.visible = false;
   generated = true;
 
-  body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, SCENE.meshes[3]); // Beyblade
+  body1 = new Rigidbody(RIGIDBODY_TYPES.DYNAMIC, beybladeMesh); // Beyblade
   body1.setup({
     gravity: 1.0,
     linearVel: {
@@ -148,17 +183,17 @@ function setupGamePhysics() {
     },
     angularVel: {
       x: 2.0 * Math.PI * 0.0,
-      y: 2.0 * Math.PI * 22.0, // Rotations per second
+      y: 2.0 * Math.PI * 20.0, // Rotations per second
       z: 2.0 * Math.PI * 0.0,
     },
-    linearDamp: 0.01,
+    linearDamp: 0.015,
     angularDamp: 0.03,
     mass: 35.0,
     center: { x: 0.0, y: -0.15, z: 0.0 },
     momentIntertia: { x: 0, y: 50, z: 0 },
   });
 
-  body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, SCENE.meshes[2]); // Stadium
+  body2 = new Rigidbody(RIGIDBODY_TYPES.STATIC, stadiumMesh); // Stadium
   body2.setup({
     gravity: 1.0,
     linearVel: {
@@ -194,8 +229,8 @@ function setupGamePhysics() {
       friction: 0.7,
       restitution: 0.25,
       density: 2.0,
-      vertices: SCENE.meshes[3].mesh.geometry.attributes.position.array,
-      indices: SCENE.meshes[3].mesh.geometry.index.array,
+      vertices: beybladeMesh.mesh.geometry.attributes.position.array,
+      indices: beybladeMesh.mesh.geometry.index.array,
     },
     {
       subdivisions: 1,
@@ -219,13 +254,13 @@ function setupGamePhysics() {
       friction: 0.3, // Some friction from the stadium
       restitution: 0.0,
       density: 1.0,
-      vertices: SCENE.meshes[2].mesh.geometry.attributes.position.array,
-      indices: SCENE.meshes[2].mesh.geometry.index.array,
+      vertices: stadiumMesh.mesh.geometry.attributes.position.array,
+      indices: stadiumMesh.mesh.geometry.index.array,
     },
     {
       subdivisions: 1,
     }
   );
   SIM.addRigidbody(body2);
-  RENDERER.updateFocus(SCENE.meshes[3]);
+  RENDERER.updateFocus(beybladeMesh);
 }

@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build", 
+    "build": "vite build",
     "preview": "vite preview"
   },
   "repository": {
@@ -20,7 +20,7 @@
   },
   "homepage": "https://github.com/sps1112/three-js-renderer#readme",
   "dependencies": {
-    "@dimforge/rapier3d": "^0.13.1",
+    "@dimforge/rapier3d": "^0.18.0",
     "gsap": "3.12",
     "lil-gui": "^0.19.2",
     "three": "^0.165.0",

@@ -2,7 +2,7 @@
 //---------------------------------------------------------------
 //! Physics Dependencies
 //-----------------------------------------------
-import RAPIER from "https://cdn.skypack.dev/@dimforge/rapier3d-compat";
+import RAPIER from "https://cdn.jsdelivr.net/npm/@dimforge/rapier3d-compat/+esm";
 //-----------------------------------------------
 
 //! Physics Variables
